@@ -17,3 +17,10 @@ set flush off
 set echo off
 ```
 
+```shell
+# sqlplus 环境变量配置
+vi $ORACLE_HOME/sqlplus/admin/glogin.sql
+
+
+```
+
