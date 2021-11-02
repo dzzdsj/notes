@@ -15,6 +15,9 @@ set feedback off
 set flush off
 --只显示输出结果到屏幕上，而不会显示SQL语句
 set echo off
+
+--show 命令：查看set配置信息
+show feedback;
 ```
 
 ```shell
