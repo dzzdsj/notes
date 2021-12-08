@@ -27,3 +27,5 @@ vi $ORACLE_HOME/sqlplus/admin/glogin.sql
 
 ```
 
+
+
