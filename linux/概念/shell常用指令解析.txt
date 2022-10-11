@@ -1,0 +1,32 @@
+exec命令
+     exec [-cl] [-a name] [command [arguments]]
+                  If  command  is  specified,  it  replaces the shell.  No new process is created.  The arguments become the
+                  arguments to command.  If the -l option is supplied, the shell places a  dash  at  the  beginning  of  the
+                  zeroth  argument  passed to command.  This is what login(1) does.  The -c option causes command to be exe‐
+                  cuted with an empty environment.  If -a is supplied, the shell passes name as the zeroth argument  to  the
+                  executed  command.   If  command cannot be executed for some reason, a non-interactive shell exits, unless
+                  the shell option execfail is enabled, in which case it returns  failure.   An  interactive  shell  returns
+                  failure  if the file cannot be executed.  If command is not specified, any redirections take effect in the
+                  current shell, and the return status is 0.  If there is a redirection error, the return status is 1.
+    -c #在空环境中执行指定的命令
+    -l #在传递给command的第零个arg的开头放置一个破折号
+    -a #Shell将name作为第零个参数传递给command
+
+mkfifo命令
+Usage: mkfifo [OPTION]... NAME...
+Create named pipes (FIFOs) with the given NAMEs.
+
+Mandatory arguments to long options are mandatory for short options too.
+  -m, --mode=MODE    set file permission bits to MODE, not a=rw - umask
+  -Z                   set the SELinux security context to default type
+      --context[=CTX]  like -Z, or if CTX is specified then set the SELinux
+                         or SMACK security context to CTX
+      --help     display this help and exit
+      --version  output version information and exit
+
+无名管道和有名管道具有以下特点：
+（1）管道是特殊类型的文件，在满足先入先出的原则下可能进行读写。但不能定位读写位置。
+（2）管道是单向的，要实现双向，需要两个管道。而无名管道一般只用于亲缘关系进程间通信（非亲缘关系进程只能传递文件描述符）。有名管道以磁盘文件的方式存在，可以实现本机任意两进程通信。
+（3）阻塞问题。无名管道无需显式打开，创建时直接返回文件描述符，而在读写时需要确定对方的存在，即阻塞于读写位置，而有名管道在打开时需要确定对方的存在，否则阻塞。
+
+

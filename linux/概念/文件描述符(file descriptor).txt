@@ -1,0 +1,20 @@
+Linux 中一切都可以看作文件，包括普通文件、链接文件、Socket 以及设备驱动等，对其进行相关操作时，都可能会创建对应的文件描述符。文件描述符（file descriptor）是内核为了高效管理已被打开的文件所创建的索引，用于指代被打开的文件，对文件所有 I/O 操作相关的系统调用都需要通过文件描述符。
+习惯上，标准输入（standard input）的文件描述符是 0，标准输出（standard output）是 1，标准错误（standard error）是 2。
+[root@dev ~]# ls -l /proc/104344/fd/
+total 0
+l-wx------ 1 root root 64 Sep 26 10:37 0 -> /dev/null
+l-wx------ 1 root root 64 Sep 26 10:37 1 -> /home/test/nohup.out
+l-wx------ 1 root root 64 Sep 26 10:37 2 -> /home/test/nohup.out
+lr-x------ 1 root root 64 Sep 26 10:37 255 -> /home/test/testfd.sh
+
+查看所有进程允许打开的最大 fd 数量
+cat /proc/sys/fs/file-max
+
+查看所有进程已经打开的 fd 数量以及允许的最大数量
+cat /proc/sys/fs/file-nr
+
+查看单个进程允许打开的最大 fd 数量.
+ulimit -n 
+
+查看某进程已经打开的 fd
+ls -l /proc/{pid}/fd/
