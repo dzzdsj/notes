@@ -25,6 +25,18 @@ delete noprompt archivelog all;
 0 */3 * * * sh /home/oracle/script/clear_arch.sh > logfile.log  -->linux
 0,10,20 * * * * sh /home/oracle/script/clear_arch.sh > logfile.log  -->aix
 
+--开启归档日志、强制日志模式、附加日志
+select log_mode,force_logging from v$database;
+shutdown immediate;
+startup mount;
+alter database archivelog;
+alter database open;
+alter database force logging;
+alter database add supplemental log data;
+alter system switch logfile;
+show parameter ENABLE_GOLDENGATE_REPLICATION;
+alter system set ENABLE_GOLDENGATE_REPLICATION = TRUE SCOPE = BOTH;
+
 ```
 
 ## 用户管理
@@ -72,4 +84,40 @@ select count(*) FROM v$session;
 --todo
 show parameter workare;
 ```
+
+--统计信息时间修改
+调整统计信息收集时间：
+select * from dba_scheduler_windows;
+
+BEGIN
+  DBMS_SCHEDULER.DISABLE(
+  name => '"SYS"."MONDAY_WINDOW"',
+  force => TRUE);
+END;
+/
+
+BEGIN
+  DBMS_SCHEDULER.SET_ATTRIBUTE(
+  name => '"SYS"."MONDAY_WINDOW"',
+  attribute => 'REPEAT_INTERVAL',
+  value => 'freq=daily;byday=THU;byhour=22;byminute=0; bysecond=0 ');
+END;
+/
+
+BEGIN
+  DBMS_SCHEDULER.ENABLE(
+  name => '"SYS"."MONDAY_WINDOW"');
+END;
+/
+
+（此为修改持续时间：）
+
+BEGIN
+  DBMS_SCHEDULER.SET_ATTRIBUTE(
+  name => '"SYS"."SATURDAY_WINDOW"',
+  attribute => 'DURATION',
+  value => numtodsinterval(240,'minute'));
+END;  
+/
+
 

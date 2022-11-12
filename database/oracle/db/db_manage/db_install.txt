@@ -1,0 +1,689 @@
+oracle数据库安装指南：
+1.安装前检查：
+系统
+ Red Hat Enterprise Linux 8: 4.18.0-80.el8.x86_64 or later
+ Red Hat Enterprise Linux 7.5: 3.10.0-862.11.6.el7.x86_64 or later
+目录检查
+At least 1 GB of space in the /tmp directory
+[oracle@centos7-n1 shm]$ df -h /tmp
+Filesystem               Size  Used Avail Use% Mounted on
+/dev/mapper/centos-root   50G   13G   38G  25% /
+在/tmp目录不够大的时候可以新建目录并在环境变量中指定来处理
+vi /home/oracle/.bash_profile
+
+TMP=/mount_point/tmp
+TMPDIR=/mount_point/tmp
+export TMP TMPDIR
+an entry in /etc/fstab to mount /dev/shm.    可读、写、执行（tmpfs基于内存的文件系统）
+[oracle@centos7-n1 shm]$df -h 
+tmpfs                    910M  292M  618M  33% /dev/shm
+
+swap space   虚拟内存配置     （在硬盘上开辟空间当内存不够时充当内存使用）
+
+增加swap空间大小：
+https://www.cnblogs.com/llkmst/p/4684097.html
+mkdir /home/tmp/swap
+mkswap /home/tmp/swap
+dd if=/dev/zero of=/home/tmp/swap/swapfile1 bs=1024 count=4000000
+du -sh /home/tmp/swap/swapfile1
+mkswap /home/tmp/swap/swapfile1
+swapon /home/tmp/swap/swapfile1
+设置开机自动生效
+vi /etc/fstab 
+新增
+/home/tmp/swap/swapfile1       swap                    swap    defaults        0 0
+
+存储空间
+At least 7.2 GB for Oracle Database Enterprise Edition.
+
+指令：
+determine physical RAM size on the server
+grep MemTotal /proc/meminfo
+Determine the size of the configured swap space
+grep SwapTotal /proc/meminfo
+Determine the amount of space available in the /tmp directory
+df -h /tmp
+Determine the amount of free RAM and disk swap space on the system:
+free
+5. Determine if the system architecture can run the software:
+uname -m
+Verify that shared memory (/dev/shm) is mounted properly with sufficient size:
+df -h /dev/shm
+
+依赖检查：
+
+
+yum install -y bc
+yum install -y binutils
+yum install -y compat-libcap1
+yum install -y compat-libstdc++-33
+yum install -y elfutils-libelf
+yum install -y elfutils-libelf-devel
+yum install -y fontconfig-devel
+yum install -y glibc
+yum install -y glibc-devel
+yum install -y ksh
+yum install -y libaio
+yum install -y libaio-devel
+yum install -y libX11
+yum install -y libXau
+yum install -y libXi
+yum install -y libXtst
+yum install -y libXrender
+yum install -y libXrender-devel
+yum install -y libgcc
+yum install -y libstdc++
+yum install -y libstdc++-devel
+yum install -y libxcb
+yum install -y make
+yum install -y smartmontools
+yum install -y sysstat
+
+新建用户组：
+Create an Oracle Inventory group   //安装用户组，软件目录和oracle inventory需要权限
+Creating the OSDBA Group for Database Installations   
+Creating an OSOPER Group for Database Installations   
+Creating the OSBACKUPDBA Group for Database Installations
+Creating the OSDGDBA Group for Database Installations
+Creating the OSDBA for ASM Group
+Creating the OSOPER for ASM Group
+Creating the OSKMDBA Group for Database Installations   //加密管理
+/usr/sbin/groupadd -g 54321 oinstall   
+/usr/sbin/groupadd -g 54322 dba
+/usr/sbin/groupadd -g 54323 oper
+/usr/sbin/groupadd -g 54324 backupdba
+/usr/sbin/groupadd -g 54325 dgdba
+/usr/sbin/groupadd -g 54326 kmdba
+/usr/sbin/groupadd -g 54330 racdba
+以下是可选asm用户组
+/usr/sbin/groupadd -g 54327 asmdba
+/usr/sbin/groupadd -g 54328 asmoper
+/usr/sbin/groupadd -g 54329 asmadmin
+查看已建立的用户组和用户信息
+grep "oinstall" /etc/group
+id oracle
+id grid
+新建oracle用户、创建目录
+－g：指定用户所属的起始群组。
+－G：指定用户所属的附加群组
+/usr/sbin/useradd -u 54321 -g oinstall -G oper,dba,asmdba,backupdba,dgdba,kmdba,racdba oracle
+passwd oracle
+mkdir -p /oracle/app/oracle/product/19c/dbhome_1
+mkdir -p /oracle/app/oraInventory     //OUI uses to keep track of all Oracle software installed on the computer
+chown -R oracle:oinstall /oracle/app
+
+环境变量配置
+Set the default file mode creation mask (umask) to 022 in the shell startup file
+.bash_profile 配置这几个       ORACLE_HOME, ORACLE_BASE, ORACLE_SID,TNS_ADMIN
+  并配置 umask=022  （取消组的写权限，取消其它用户的写权限）
+/home/oracle/.bash_profile
+umask 022
+export ORACLE_SID=dzzdsjdb
+export ORACLE_BASE=/oracle/app/oracle
+export ORACLE_HOME=$ORACLE_BASE/product/19c/dbhome_1
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib:/lib:/usr/lib
+export NLS_DATE_FORMAT="YYYY-MM-DD HH24:MI:SS"
+export PATH=$ORACLE_HOME/bin:$ORACLE_HOME/OPatch:$PATH
+export TNS_ADMIN=$ORACLE_HOME/network/admin
+export ORACLE_PATH=.:$ORACLE_BASE/dba_scripts/sql:$ORACLE_HOME/rdbms/admin
+export SQLPATH=$ORACLE_HOME/sqlplus/admin
+export NLS_LANG="AMERICAN_AMERICA.AL32UTF8"
+#export EDITOR=vi
+#export NLS_LANG="AMERICAN_CHINA.ZHS16GBK"
+#alias sqlplus='rlwrap sqlplus'
+#alias rman='rlwrap rman'
+#alias asmcmd='rlwrap asmcmd'
+#export TMP=/tmp
+#export TMPDIR=$TMP
+简化版
+umask 022
+export ORACLE_SID=orcl
+export ORACLE_BASE=/oracle/app/oracle
+export ORACLE_HOME=$ORACLE_BASE/product/19c/dbhome_1
+export TNS_ADMIN=$ORACLE_HOME/network/admin
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib:/lib:/usr/lib
+export PATH=$ORACLE_HOME/bin:$ORACLE_HOME/OPatch:$PATH
+更新配置
+. ./.bash_profile
+参考：
+https://blog.csdn.net/zhoushuai520/article/details/7692479
+https://blog.csdn.net/weixin_34214500/article/details/91577718?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.channel_param
+
+系统参数配置：
+
+/etc/security/limits.conf
+配置oracle用户的部分
+* soft   core   102400
+* hard   core   102400
+* soft   nofiles 10240
+* hard   nofiles 65536
+* soft   nproc   5000
+* hard   nproc   16384
+* soft   stack   10240
+* hard   stack   32768
+oracle   soft   nproc  16384
+oracle   hard   nproc  16384
+oracle   soft   nofile 65536
+oracle   hard   nofile 65536
+oracle   soft   memlock  unlimited
+oracle   hard   memlock  unlimited
+oracle   soft   stack    10240
+oracle   hard   stack    32768
+注意：该配置的更改需要重新登出登陆用户才生效
+If you make changes to an Oracle installation user account and that user
+account is logged in, then changes to the limits.conf file do not take effect
+until you log these users out and log them back in. You must do this before
+you use these accounts for installation
+
+vi /etc/sysctl.conf
+net.core.wmem_max=1048576
+net.core.wmem_default=262144
+net.core.rmem_max=4194304
+net.core.rmem_default=262144
+fs.file-max=6815744
+kernel.sem=250 32000 100 128
+/etc/oraInst.loc
+初次安装后生成，用于指定oracle安装的用户组和配置中心目录，再次安装需要检查该文件
+[oracle@centos7-n1 ~]$ cat /etc/oraInst.loc
+inventory_loc=/oracle/app/oraInventory
+inst_group=oinstall
+
+Use the command grep groupname /etc/group to confirm that the group
+specified as the Oracle Inventory group still exists on the system. For example:
+$ grep oinstall /etc/group
+oinstall:x:54321:grid,oracle
+
+透明大页：http://blog.itpub.net/26736162/viewspace-2214374/
+cat /sys/kernel/mm/transparent_hugepage/enabled  //查看是否启用
+禁用透明大页 https://www.cnblogs.com/lvcha001/p/9071053.html
+Transparent HugePages can cause memory allocation delays during runtime. To avoid
+performance issues, Oracle recommends that you disable Transparent HugePages
+ cp /etc/default/grub /etc/default/grub.bak
+ vi /etc/default/grub
+numa=off  //关闭？
+transparent_hugepage=never 
+使配置生效
+cp  /boot/grub2/grub.cfg  /boot/grub2/grub.cfg_bak
+grub2-mkconfig -o /boot/grub2/grub.cfg
+reboot
+
+
+配置numa=off （见上图）（官方文档有，测试环境初始未配）
+
+
+hosts配置检验
+/etc/hosts
+[root@dzzdsj ~]# cat /etc/hostname
+dzzdsj.dzzdsj.com
+需要配置以下
+192.168.137.101  dzzdsj  dzzdsj.dzzdsj.com  //主机名及domain，不然可能安装时报端口被占用，[FATAL] [DBT-06103] The port (5,500) is already in use
+
+
+
+
+
+解压文件
+su - oracle
+cd $ORACLE_HOME
+unzip /V981623-01-db-19.2.0.0.0.zip
+
+配置responsefile，silent模式安装各个项目
+
+copy、edit、chmod
+chmod 600 /local_dir/db_install.rsp
+
+依赖安装
+    yum install -y gcc-c++ bc binutils  compat-libcap1  compat-libstdc++-33  elfutils-libelf  elfutils-libelf-devel  fontconfig-devel  glibc  glibc-devel  ksh  libaio  libaio-devel  libX11  libXau  libXi  libXtst  libXrender  libXrender-devel  libgcc  libstdc++  libstdc++-devel  libxcb  make  smartmontools  sysstat  kmod*
+
+安装环境间检查
+/oracle/app/oracle/product/19c/dbhome_1/runInstaller -silent   -executePrereqs  -responseFile /home/oracle/db_install.rsp 
+编辑responsefile，安装数据库：
+/oracle/app/oracle/product/19c/dbhome_1/runInstaller -silent  -force -noconfig  -ignorePrereq  -responseFile /oracle/app/oracle/product/19c/dbhome_1/install/response/db_install.rsp 
+（兴业）
+/oracle/app/oracle/product/19c/dbhome_1/runInstaller -silent    -ignorePrereqFailure  -responseFile /home/oracle/db_install.rsp 
+编辑responsefile，配置监听：
+/oracle/app/oracle/product/19c/dbhome_1/bin/netca /silent /responsefile /oracle/app/oracle/product/19c/dbhome_1/assistants/netca/netca.rsp
+编辑responsefile，创建并配置数据库：
+$ORACLE_HOME/bin/dbca -silent -createDatabase -responseFile /oracle/app/oracle/product/19c/dbhome_1/assistants/dbca/dbca.rsp
+
+
+启动 
+bin目录下。
+./sqlplus / as sysdba
+
+sqlplus /nolog
+
+connect / as sysdba
+conn sys/"Dzzdsj@126.com" as sysdba;
+startup mount;
+
+alter database open;
+
+登录管理界面：https://127.0.0.1:5500/em/   需要加https 加s，登录时不要填容器名
+
+
+将数据库启动到mount的命令：
+startup mount [PFILE=filename]
+ 
+将数据库由nomount转换到mount状态：
+alter database mount;
+
+关闭：https://www.cnblogs.com/hualuohuakai/p/7184848.html
+SHUTDOWN IMMEDIATE
+
+
+进程查看https://blog.csdn.net/evilcry2012/article/details/78499162
+这个命令会列出Oracle Net Listener的进程
+ps -ef | grep tnslsnr 
+Oracle Background Process
+ps -ef | grep -i "ora_" 
+或者
+select * FROM v$session WHERE type ='BACKGROUND'; 
+Oracle Management Agent
+ ps -ef | grep emagent  
+oracle监听服务 https://zhidao.baidu.com/question/1114314563828050579.html
+lsnrctl status
+lsnrctl start
+以system用户身份登陆oracle，sqlplus /nolog，conn as sysdba
+提示Connected to an idle instance。则表示连接成功，下面开始启动oracle实例服务，输入startup命令
+
+
+服务器预装软件的问题：监听服务没启动，sid未指定
+export  ORACLE_SID=orcl
+
+告警日志文件是一类特殊的跟踪文件（trace file）。告警日志文件命名一般为alert_<SID>.log，其中SID为ORACLE数据库实例名称。数据库告警日志是按时间顺序记录message和错误信息
+
+两个脚本的作用：
+orainstRoot.sh：
+设置产品目录位置与拥有该目录的操作系统组，并产生/etc/oraInst.loc。
+root.sh：
+用来设置必要的操作系统权限，并将orahome，oraenv，coraenv复制到/usr/local/bin目录下。生成/etc/oratab，其中存放一些数据库相关信息。
+
+
+在控制台用sqlplus / as sysdba登陆oracle系统时，所用的用户bai名和密码通常有四种。
+
+用户名: internal  密码:oracle  
+
+2. 用户名:system    密码:manager  
+
+3. 用户名:sys           密码:change_on_install
+
+查看版本https://www.cnblogs.com/wolfplan/p/3876164.html
+select * from v$version;
+select * from product_component_version;
+查看补丁：
+$ORACLE_HOME/OPatch/opatch  lsinventory
+
+
+oracle数据库，启动报错，找不到initorcl.ora文件
+https://blog.csdn.net/lixiaomeng_/article/details/79352739
+/oracle/app/oracle/admin/xx/pfile/init.ora.10242017153319 文件copy到 /home/oracle/app/oracle/product/11.2.0/dbhome_1/dbs下面，重命名为initorcl.ora即可
+
+ora-01102 ：https://www.linuxidc.com/linux/2017-06/144748.htm
+杀死占用的进程（$ORACLE_HOME/dbs/ 目录下的  lkXXXXX 文件）
+/sbin/fuser的主要功能是使用文件或者套接字来表示识别进程。常把它用来查看相关进程和杀死相关进程
+yum install psmisc   //安装
+fuser -u lkXXXX   //查看
+fuser -k lkXXXX   //释放
+
+报错处理：ORA-00845: MEMORY_TARGET not supported on this system
+https://blog.csdn.net/sunny05296/article/details/56495599
+或者修改memory_target
+/oracle/app/oracle/product/19c/dbhome_1/dbs/initorcl.ora
+
+报错：lsnrctl      The listener supports no services
+sql> alter system register;   //手工注册
+
+查看当前正在使用的库：
+select name from V$DATABASE;
+select * from v$database; //数据库的基本情况
+查看当前用户：
+ show user;
+解锁用户：
+alter user scott account unlock;
+
+
+navicat 连接oracle：https://www.cnblogs.com/xiangxiushu/p/11058978.html
+另外用sys用户登录时需要在高级选项卡里选择角色为sysdba
+
+sqlplus 显示调整：
+SQL> show linesize;  //当前宽度
+SQL> show pagesize;  //显示的条数
+set wrap off     
+set linesize 200  //大一点的值
+set pagesize 30  
+基本语句：
+ 创建公共用户
+alter session set container=CDB$ROOT;  //切换至CDB
+ create user C##dzzdsjtest identified by dzzdsjtest container=all;
+ 创建本地用户
+alter session set container=dzzdsjpd;  //切换至指定PDB
+create USER dzzdsjtest identified by dzzdsjtest  container=current;
+1 公共用户必须以C##开头，本地用户只能以字母开头，不能以C##用户开头
+2 创建公共用户时，必须是在CDB$ROOT
+3 如果在PDB中已经存在一个用户或者角色，则在CDB中不能创建相同的账号或者角色名
+
+表空间相关语句：https://jingyan.baidu.com/article/48b37f8dde34bd1a65648871.html
+select * from Dba_Tablespaces;   //查看所有表空间
+select * from DBA_DATA_FILES;  //查看表空间的物理信息
+select username,default_tablespace from dba_users;  //查看默认表空间
+select username,default_tablespace from user_users;  //查看当前用户和默认表空间
+create tablespace ogg_tbspace datafile '/oracle/app/oracle/oradata/ORCL/ogg01.dbf' size 100m AUTOEXTEND ON NEXT 32M maxsize 2048m;//创建表空间
+drop tablespace xxx including contents and datafiles; //删除表空间
+https://blog.csdn.net/shaochenshuo/article/details/26398451
+全部表空间的大小
+select tablespace_name, sum(bytes)/1024/1024 from dba_data_files group by tablespace_name;
+空闲表空间大小
+select tablespace_name, sum(bytes)/1024/1024 from dba_free_space group by tablespace_name;
+ 已使用空间
+ select a.tablespace_name, total, free, total-free as used from
+(select tablespace_name, sum(bytes)/1024/1024 as total from dba_data_files group by tablespace_name) a,
+(select tablespace_name, sum(bytes)/1024/1024 as free from dba_free_space group by tablespace_name) b
+where a.tablespace_name = b.tablespace_name;
+或者
+select a.tablespace_name, total, free, total-free as used, substr(free/total * 100, 1, 5) as "FREE%", substr((total - free)/total * 100, 1, 5) as "USED%" from 
+(select tablespace_name, sum(bytes)/1024/1024 as total from dba_data_files group by tablespace_name) a, 
+(select tablespace_name, sum(bytes)/1024/1024 as free from dba_free_space group by tablespace_name) b
+where a.tablespace_name = b.tablespace_name
+order by a.tablespace_name;
+授权：https://www.cnblogs.com/roger112/p/7685307.html
+grant connect, resource, dba to C##dzzdsjtest;  //三大类权限
+CDB PDB:https://www.cnblogs.com/chinasui/p/9963371.html
+show con_name;  --用show查看当前属于哪个容器
+alter session set container=CDB$ROOT;  //切换至CDB
+alter session set container=ORCLPDB; //切换至指定PDB
+ SQL > ALTER PLUGGABLE DATABASE ALL OPEN; --启动所有pdb 数据库
+SQL > ALTER PLUGGABLE DATABASE PDB_NAME OPEN; --启动某一个pdb数据库。
+show pdbs; //查看pdb的状态
+
+select * from USER_ROLE_PRIVS;  //查看权限
+用户、表空间：https://www.cnblogs.com/liutoliu/p/11818659.html
+ show con_name;  //查看当前连接
+cdb
+alter session set container=CDB$ROOT;
+create user C##dzzdsj identified by dzzdsj;
+grant connect, resource to C##dzzdsj;
+create tablespace C##dzzdsj_tbspace datafile '/oracle/app/oracle/oradata/ORCL/c##dzzdsj01.dbf' size 10m AUTOEXTEND ON NEXT 32M maxsize 512m;
+alter user C##dzzdsj default tablespace C##dzzdsj_tbspace;
+pdb
+ 先按上面步骤查看和开启pdb
+ alter session set container=ORCLPDB;
+ create user dzzdsj identified by dzzdsj;  //新建用户(加双引号，如果用了小写字母，存储时也是小写。
+不加双引号，存储时，会把小写转换成大写。)
+ alter user dzzdsj account unlock; //解锁
+ create tablespace dzzdsj_tbspace datafile '/oracle/app/oracle/oradata/ORCL/dzzdsj01.dbf' size 100m AUTOEXTEND ON NEXT 32M maxsize 2048m;
+ alter user dzzdsj default tablespace dzzdsj_tbspace; //分配表空间
+ alter user dzzdsj quota unlimited  on  dzzdsj_tbspace; //开启表空间权限
+ grant connect, resource to dzzdsj;
+ grant create session,create table,unlimited tablespace to dzzdsj;
+ select username from dba_users ORDER BY username;  //查看用户
+ 
+
+select table_name from user_tables;//查询当前用户的所有表
+SQL> select * from "t_student";  //表名和字段加双引号，否则会找不到
+双引号的作用：关键字，对象名、字段名加双引号，则示意 Oracle将严格区分大小写，否则Oracl都默认大写
+https://blog.csdn.net/qq_22642239/article/details/52758783
+
+
+ 删除用户：
+ 语法：drop user 用户名;
+例子：drop user test;
+若用户拥有对象，则不能直接删除，否则将返回一个错误值。指定关键字cascade,可删除用户所有的对象，然后再删除用户。
+语法： drop user 用户名 cascade;
+
+查看监听的名字：lsnrctl services
+
+
+show parameter name;
+ping orcl.dzzdsj.com
+tnsping orcl.dzzdsj.com   //如果解析到异常的ip，需要在hosts里头改成正确的
+tns配置修改完重载配置：
+lsnrctl reload;
+
+
+ 删除 cdb：
+cdb需要在mount限制登录模式下才能删除
+SQL> shutdown immediate;
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+SQL> startup mount;  
+SQL> alter system enable restricted session;     --限制登录模式
+System altered.
+SQL> drop database;
+
+
+listener.ora  tnsnames.ora  sqlnet.ora   https://blog.csdn.net/bibibrave/article/details/82355466
+https://www.cnblogs.com/cnmarkao/p/5336635.html
+
+
+用netca初始化监听服务时会创建listener.ora  (有静态注册和动态注册两种)
+用dbca建立数据库时会创建tnsnames.ora  
+gdbName = <db_name>.<db_domain>
+
+lsnrctl 命令：https://www.cnblogs.com/capable/p/6368596.html
+
+
+可视化：
+1.在root下执行 
+#xdpyinfo 记录下name of display：后的字符串，如 127.0.0.1：1.0 
+xhost + 
+xdpyinfo | grep name  //记下最后的串口，如1.0
+3.切换到Oracle用户： 
+#su - oracle 
+4.在Oracle用户下执行命令： 
+export DISPLAY=xxxxxxxxip:0.0    //一般都是单个显示器，默认取0
+5.在Oracle下执行xdpyinfo命令，如果能正常显示，说明设置成功 
+
+X 显示器是通过 hostname:displaynumber.screennumber 这种形式的名称知晓的
+
+
+几个易混淆参数：https://blog.csdn.net/qq_36276335/article/details/53692078
+db_name:
+db_name记录在controlfile，datafile_header,redo中，要想修改db_name是比较麻烦的有两种办法：1、重建controlfile,之后要求必须以reseglogs方式打开数据库；2、通过nid。另外在建库时db_name被限制为最长8个字符
+db_name还有一个非常重要的作用就是动态注册监听
+SQL> show parameter db_name;
+
+NAME				     TYPE	 VALUE
+------------------------------------ ----------- ------------------------------
+db_name 			     string	 orcl
+
+
+SQL> show parameter service_names;
+
+NAME				     TYPE	 VALUE
+------------------------------------ ----------- ------------------------------
+service_names			     string	 orcl.oracle-a
+
+
+SQL> show parameter instance_name;
+
+NAME				     TYPE	 VALUE
+------------------------------------ ----------- ------------------------------
+instance_name			     string	 orcl
+
+SID:System Identifier 在host上用sid来标示实例的共享内存的
+system identifier (SID). The
+SID is a unique identifier that is used to distinguish this instance from other Oracle
+SQL> select instance_name from v$instance;
+
+INSTANCE_NAME
+----------------
+orcl
+
+
+SQL> show parameter service_names
+
+NAME				     TYPE	 VALUE
+------------------------------------ ----------- ------------------------------
+service_names			     string	 orcl.oracle-a
+
+
+SQL> show parameter db_domain;
+
+NAME				     TYPE	 VALUE
+------------------------------------ ----------- ------------------------------
+db_domain			     string	 oracle-a
+
+global database name = database_name.database_domain 
+SQL> select * from global_name;
+
+GLOBAL_NAME
+--------------------------------------------------------------------------------
+ORCL.ORACLE-A
+
+db_unique_name：
+SQL> show parameter db_unique_name;
+
+NAME				     TYPE	 VALUE
+------------------------------------ ----------- ------------------------------
+db_unique_name			     string	 orcl
+修改db_unique_name：需要重启生效
+SQL> alter system set db_unique_name='orcl_dg02' scope=spfile;
+scope参数指定：https://www.cnblogs.com/timlong/p/6089680.html
+The SCOPE clause lets you specify when the change takes effect. Scope depends on whether you started up the database using a client-side parameter file (pfile) or server parameter file (spfile).
+scope可指定对system的修改何时生效，scope=memory|spfile|both ,值取决于数据库使用pfile还是spfile启动
+
+spfile   pfile:
+ORACLE中的参数文件是一个包含一系列参数以及参数对应值的操作系统文件，可以分为两种类型。它们是在数据库实例启动时候加载的，决定了数据库的物理结构、内存、数据库的限制及系统大量的默认值、数据库的各种物理属性、指定数据库控制文件名和路径等信息，是进行数据库设计和性能调优的重要文件。
+初始化参数文件（Initialization Parameters Files），Oracle 9i之前，ORACLE一直采用PFILE方式存储初始化参数，该文件为文本文件。
+服务器参数文件（Server Parameter Files），从Oracle 9i开始，Oracle引入了SPFILE文件，该文件为二进制格式，不能通过手工修改
+SQL> SELECT NAME, VALUE, DISPLAY_VALUE FROM V$PARAMETER WHERE NAME ='spfile';
+
+NAME
+--------------------------------------------------------------------------------
+VALUE
+--------------------------------------------------------------------------------
+DISPLAY_VALUE
+--------------------------------------------------------------------------------
+spfile
+/oracle/app/oracle/product/19c/dbhome_1/dbs/spfileorcl.ora
+/oracle/app/oracle/product/19c/dbhome_1/dbs/spfileorcl.ora
+
+判断是用spfile还是pfile启动：
+SQL> show parameter spfile;
+
+NAME				     TYPE	 VALUE
+------------------------------------ ----------- ------------------------------
+spfile				     string	 /oracle/app/oracle/product/19c
+						 /dbhome_1/dbs/spfileorcl.ora
+SQL>  show parameter pfile;
+
+NAME				     TYPE	 VALUE
+------------------------------------ ----------- ------------------------------
+spfile				     string	 /oracle/app/oracle/product/19c
+						 /dbhome_1/dbs/spfileorcl.ora
+
+重建PFILE或SPFILE
+
+create spfile[='xxxxx'] from pfile[='xxxx'];
+create pfile[='xxxxx'] from spfile[='xxxx'];   
+
+通过spfile创建pfile文件（此时会在$ORACLE_HOME/dbs目录下生成pfile：initwgods.ora），当然你也可以指定参数文件的位置。
+
+连接远程数据库
+SQL> conn sys/dzzdsj@192.168.137.111:1521/orcl.odb1 as sysdba;
+conn sys/dzzdsj@192.168.137.112:1521/orcl.odb2 as sysdba;
+
+
+oracle 目录结构 https://zhuanlan.zhihu.com/p/70031515
+
+admin 目录  
+记录 Oracle 实例的配置，运行日志等文件。每个实例一个目录。
+cfgtoollogs 目录
+下面子目录分别存放当运行 dbca，emca，netca 等图形化配置程序时的 log
+checkpoints 目录
+存放检查点文件
+diag 目录
+Oracle11g 新添加的一个重组目录。其中的子目录，基本上 Oracle 每个组件都有了自己
+单独的目录，在 Oracle10g 中我们一直诟病的 log 文件散放在四处的问题终于得到解决，无
+论是 asm 还是 crs 还是 rdbms，所有组件需要被用来诊断的 log 文件都存放在了这个新的目
+录下
+
+
+tnsnames.ora
+SQL> conn sys/dzzdsj@odb1:1521/orcl
+ERROR:
+ORA-28009: connection as SYS should be as SYSDBA or SYSOPER
+
+
+SQL> conn sys/dzzdsj@ogg1
+ERROR:
+ORA-28009: connection as SYS should be as SYSDBA or SYSOPER
+
+
+OGG1 =
+  (DESCRIPTION =
+    (ADDRESS_LIST =
+      (ADDRESS = (PROTOCOL = TCP)(HOST = odb1)(PORT = 1521))
+    )
+    (CONNECT_DATA =
+      (SERVICE_NAME = orcl)
+    )
+  )
+可以使用tnsnames.ora的别名，也可以使用ip+端口+service_name的形式
+
+oracle字符集的选用：https://www.cnblogs.com/buxingzhelyd/p/8670161.html
+oracle字符集查看：https://www.bbsmax.com/A/x9J210Ngz6/
+1、查看实例字符集环境
+SQL> SELECT * FROM NLS_INSTANCE_PARAMETERS;
+2、查看数据库服务器字符集环境：
+SQL> SELECT * FROM NLS_DATABASE_PARAMETERS;
+3、查看客户端字符集环境
+SQL> SELECT * FROM V$NLS_PARAMETERS;
+4、查看会话字符集环境
+SQL> SELECT * FROM NLS_SESSION_PARAMETERS;
+字符集的三个相关参数：https://jingyan.baidu.com/article/4853e1e5cd57205809f7269f.html
+
+NLS_LANG = language_territory.charset
+它有三个组成部分(语言、地域和字符集)，每个成分控制了NLS子集的特性。其中:
+　　Language 指定服务器消息的语言，territory 指定服务器的日期和数字格式，charset 指定字符集。如:AMERICAN _ AMERICA. ZHS16GBK
+
+
+simplified chinese_china.zhs16gbk american_america.al32utf8
+
+
+
+sqlplus远程登录：https://blog.csdn.net/czh500/article/details/89633382
+语法：登录名/密码@远程ip地址:端口号/服务名
+system/system@127.0.0.1:1521/orcl
+或者设置tnsnames.ora
+system/system@tnsname
+
+
+
+报错处理：
+sqlplus ？？？？ 语言为简体中文时，显示问号
+export NLS_LANG=american_america.zhs16gbk
+export NLS_LANG="SIMPLIFIED CHINESE_CHINA.ZHS16GBK"
+
+oracle自带的报错解释器：如ora-01653
+oerr ora 01653 //oracle目录下执行
+
+动态监听注册不了时：http://blog.itpub.net/29785807/viewspace-2684545/
+SQL> alter system set local_listener='';
+System altered.
+手动注册
+SQL> alter system register;
+System altered.
+
+aix安装报错：
+启动sqlplus报错：
+AIX 12.1.0.2 rtld: 0712-001 Symbol CreateIoCompletionPort was referenced from module
+https://blog.csdn.net/leo__1990/article/details/89891677
+lsdev |grep iocp
+smitty iocp
+lsdev |grep iocp
+
+非oracle用户sqlplus 连接问题：
+需要tnsname.ora的读权限才能使用@service_name的形式连接
+
+
+
+
+--dbca安装数据库
+--指定response文件
+$ORACLE_HOME/bin/dbca -silent -createDatabase -responseFile /oracle/app/oracle/product/19c/dbhome_1/assistants/dbca/dbca.rsp
+
+
+

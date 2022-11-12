@@ -1,0 +1,16 @@
+先打印用户名密码密文
+cat /opt/weblogic/user_projects/domains/base_domain/servers/AdminServer/security/boot.properties
+username={AES256}P6cS4rkikRo/hPN1Y6wEkHcQdxYs9lLRY+jSbVidCLo=
+password={AES256}sFVRATixpCXVuRVQthcbxEG+Pw6UJkuajdnE4dQ1YHg=
+
+执行wlst脚本
+sh /opt/weblogic/wlserver/common/bin/wlst.sh
+输入以下三个内容，domain需要改成对应的。
+wls:/offline> domain = "/opt/weblogic/user_projects/domains/base_domain"
+wls:/offline> service = weblogic.security.internal.SerializedSystemIni.getEncryptionService(domain)
+wls:/offline> encryption = weblogic.security.internal.encryption.ClearOrEncryptedService(service)
+解密上面得到的密文
+wls:/offline> print "Weblogic server Admin name: %s" %encryption.decrypt("{AES256}P6cS4rkikRo/hPN1Y6wEkHcQdxYs9lLRY+jSbVidCLo=")
+Weblogic server Admin name: weblogic
+wls:/offline> print "Weblogic server Admin password: %s" %encryption.decrypt("{AES256}sFVRATixpCXVuRVQthcbxEG+Pw6UJkuajdnE4dQ1YHg=")
+Weblogic server Admin password: Dzzdsj1991
