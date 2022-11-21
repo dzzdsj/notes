@@ -88,6 +88,7 @@ Creating the OSDGDBA Group for Database Installations
 Creating the OSDBA for ASM Group
 Creating the OSOPER for ASM Group
 Creating the OSKMDBA Group for Database Installations   //加密管理
+
 /usr/sbin/groupadd -g 54321 oinstall   
 /usr/sbin/groupadd -g 54322 dba
 /usr/sbin/groupadd -g 54323 oper
@@ -201,7 +202,7 @@ performance issues, Oracle recommends that you disable Transparent HugePages
  cp /etc/default/grub /etc/default/grub.bak
  vi /etc/default/grub
 numa=off  //关闭？
-transparent_hugepage=never 
+GRUB_CMDLINE_LINUX的配置值后面追加 transparent_hugepage=never 
 使配置生效
 cp  /boot/grub2/grub.cfg  /boot/grub2/grub.cfg_bak
 grub2-mkconfig -o /boot/grub2/grub.cfg
@@ -209,6 +210,29 @@ reboot
 
 
 配置numa=off （见上图）（官方文档有，测试环境初始未配）
+
+禁用防火墙
+systemctl stop firewalld
+systemctl disable firewalld
+systemctl status firewalld
+
+禁用selinux
+cp /etc/selinux/config /etc/selinux/config.bak
+vi /etc/selinux/config
+修改 SELINUX=disabled
+
+禁用ASLR
+sysctl -a|grep randomize  //返回值非0表示正在使用
+vi /etc/sysctl.conf 
+修改 kernel.randomize_va_space=0
+sysctl -p 
+
+禁用avahi-daemon 
+systemctl stop avahi-dnsconfd
+systemctl disable avahi-dnsconfd
+systemctl stop avahi-daemon
+systemctl disable avahi-daemon
+
 
 
 hosts配置检验
@@ -221,11 +245,12 @@ dzzdsj.dzzdsj.com
 
 
 
-
+yum install -y unzip
 解压文件
 su - oracle
 cd $ORACLE_HOME
-unzip /V981623-01-db-19.2.0.0.0.zip
+cp /opt/software/LINUX.X64_193000_db_home.zip .
+unzip LINUX.X64_193000_db_home.zip
 
 配置responsefile，silent模式安装各个项目
 
@@ -234,6 +259,34 @@ chmod 600 /local_dir/db_install.rsp
 
 依赖安装
     yum install -y gcc-c++ bc binutils  compat-libcap1  compat-libstdc++-33  elfutils-libelf  elfutils-libelf-devel  fontconfig-devel  glibc  glibc-devel  ksh  libaio  libaio-devel  libX11  libXau  libXi  libXtst  libXrender  libXrender-devel  libgcc  libstdc++  libstdc++-devel  libxcb  make  smartmontools  sysstat  kmod*
+
+cp /oracle/app/oracle/product/19c/dbhome_1/install/response/db_install.rsp /home/oracle/db_install.rsp
+vi /home/oracle/db_install.rsp
+
+可视化：
+1.在root下执行 
+#xdpyinfo 记录下name of display：后的字符串，如 127.0.0.1：1.0 
+xhost + 
+xdpyinfo | grep name  //记下最后的串口，如1.0
+（
+xhost安装
+yum whatprovides "*/xhost"
+yum -y install xorg-x11-server-utils-7.7-20.el7.x86_64 (替换成对应的版本)
+
+xdpyinfo安装
+yum install -y xdpyinfo
+）
+3.切换到Oracle用户： 
+#su - oracle 
+4.在Oracle用户下执行命令： 
+export DISPLAY=xxxxxxxxip:0.0    //一般都是单个显示器，默认取0
+5.在Oracle下执行xdpyinfo命令，如果能正常显示，说明设置成功 
+
+X 显示器是通过 hostname:displaynumber.screennumber 这种形式的名称知晓的
+配备可视化：
+export DISPLAY=172.20.10.2:0.0    //一般都是单个显示器，默认取0
+5.在Oracle下执行xdpyinfo命令，如果能正常显示，说明设置成功 
+
 
 安装环境间检查
 /oracle/app/oracle/product/19c/dbhome_1/runInstaller -silent   -executePrereqs  -responseFile /home/oracle/db_install.rsp 
@@ -464,18 +517,7 @@ gdbName = <db_name>.<db_domain>
 lsnrctl 命令：https://www.cnblogs.com/capable/p/6368596.html
 
 
-可视化：
-1.在root下执行 
-#xdpyinfo 记录下name of display：后的字符串，如 127.0.0.1：1.0 
-xhost + 
-xdpyinfo | grep name  //记下最后的串口，如1.0
-3.切换到Oracle用户： 
-#su - oracle 
-4.在Oracle用户下执行命令： 
-export DISPLAY=xxxxxxxxip:0.0    //一般都是单个显示器，默认取0
-5.在Oracle下执行xdpyinfo命令，如果能正常显示，说明设置成功 
 
-X 显示器是通过 hostname:displaynumber.screennumber 这种形式的名称知晓的
 
 
 几个易混淆参数：https://blog.csdn.net/qq_36276335/article/details/53692078
