@@ -39,15 +39,84 @@ alter system set ENABLE_GOLDENGATE_REPLICATION = TRUE SCOPE = BOTH;
 
 ```
 
-## 用户管理
+## 表空间管理
+
+### 普通表空间
 
 ```sql
---密码永不过期
-select username,profile from dba_users;
-alter profile xxxx limit password_life_time unlimited;
-alter profile xxxx limit password_reuse_time unlimited;
-alter profile xxxx limit password_reuse_max unlimited;
+--
+create tablespace dzzdsj_tbs datafile '/oracle/app/oracle/oradata/DZZDSJDB/dzzdsj01.dbf' size 50m autoextend on next 50m maxsize 30G;
+--
+alter tablespace dzzdsj_tbs add datafile '/oracle/app/oracle/oradata/DZZDSJDB/dzzdsj02.dbf' size 50m autoextend on next 50m maxsize 30G;
 ```
+
+### 临时表空间
+
+```
+create temporary tablespace tmp_dzzdsj_tbs tempfile '/oracle/app/oracle/oradata/DZZDSJDB/tmp_dzzdsj01.dbf' size 50m autoextend on next 50m maxsize 30G;
+--
+alter tablespace tmp_dzzdsj_tbs add tempfile '/oracle/app/oracle/oradata/DZZDSJDB/tmp_dzzdsj02.dbf' size 50m autoextend on next 50m maxsize 30G;
+```
+
+
+
+## 用户管理
+
+### 用户创建
+
+```sql
+--
+create user dzzdsj identified by dzzdsj default tablespace dzzdsj_tbs temporary tablespace tmp_dzzdsj_tbs profile unlimited_profile;
+--
+
+```
+
+### 免密用户
+
+```sql
+create user ops$dzzdsj identified externally;
+grant connect to ops$dzzdsj;
+grant select any dictionary to ops$dzzdsj;
+grant select any table to ops$dzzdsj;
+grant unlimited tablespace to ops$dzzdsj;
+```
+
+
+
+
+
+### 用户权限
+
+```
+grant connect to dzzdsj;
+grant resource to dzzdsj;
+grant unlimited tablespace to dzzdsj;
+```
+
+
+
+## 安全策略
+
+### profile配置
+
+```
+--
+select username,profile from dba_users;
+--
+create profile unlimited_profile limit
+failed_login_attempts unlimited
+password_life_time unlimited
+password_reuse_time unlimited
+password_reuse_max unlimited;
+
+--配置密码永不过期
+alter profile unlimited_profile limit password_life_time unlimited;
+alter profile unlimited_profile limit password_reuse_time unlimited;
+alter profile unlimited_profile limit password_reuse_max unlimited;
+alter user xxx identified by xxx;
+```
+
+
 
 ## 实例初始化参数
 

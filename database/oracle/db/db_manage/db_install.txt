@@ -727,5 +727,6 @@ lsdev |grep iocp
 --指定response文件
 $ORACLE_HOME/bin/dbca -silent -createDatabase -responseFile /oracle/app/oracle/product/19c/dbhome_1/assistants/dbca/dbca.rsp
 
-
-
+用户和表空间
+create tablespace dzzdsj_tbs datafile '/oracle/app/oracle/oradata/DZZDSJDB/dzzdsj01.dbf' size 50m autoextend on next 50m maxsize 30G;
+create temporary tablespace tmp_dzzdsj_tbs datafile '/oracle/app/oracle/oradata/DZZDSJDB/tmp_dzzdsj01.dbf' size 50m autoextend on next 50m maxsize 30G;
