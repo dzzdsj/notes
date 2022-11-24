@@ -79,30 +79,75 @@
 </html>
 ```
 
+## Vue对象的属性el、data、methods
+
+```
+   var vm = new Vue({
+      el: '#app',
+      data: {
+        msg: '123',
+        msg2: '<h1>哈哈，我是一个大大的H1， 我大，我骄傲</h1>',
+        mytitle: '这是一个自己定义的title'
+      },
+      methods: { // 这个 methods属性中定义了当前Vue实例所有可用的方法
+        show: function () {
+          alert('Hello')
+        }
+      }
+    })
+```
 
 
-## Vue之 - `基本的代码结构`和`插值表达式`、`v-cloak`
 
 
 
+## Vue指令 
 
-## Vue指令之`v-text`和`v-html`
+### `插值表达式`、`v-text、v-cloak`  、`v-html`
 
+v-cloak 解决渲染加载时闪烁问题（以下示例中网速较慢未加载js渲染出来时会先显示msg，之后变为msg对应的值）
 
-## Vue指令之`v-bind`的三种用法
+`插值表达式` {{}} 和 v-text使用区别
+
+```html
+<!-- 使用 v-cloak 能够解决 插值表达式闪烁的问题 -->
+    <p v-cloak>++++++++ {{ msg }} ----------</p>
+    <h4 v-text="msg">==================</h4>
+    <!-- 默认 v-text 是没有闪烁问题的 -->
+    <!-- v-text会覆盖元素中原本的内容，但是 插值表达式  只会替换自己的这个占位符，不会把 整个元素的内容清空 -->
+```
+
+v-html 把内容当成html解析，而v-text和{{}} 只是当成普通的字符串进行解析
+
+### `v-bind`的三种用法
+
+v-bind 用于属性的绑定，缩写是":"
 
 1. 直接使用指令`v-bind`
-
 2. 使用简化指令`:`
-
 3. 在绑定的时候，拼接绑定内容：`:title="btnTitle + ', 这是追加的内容'"`
 
+```html
+<input type="button" value="按钮" v-bind:title="mytitle + '123'">
+ <!-- 注意： v-bind: 指令可以被简写为 :要绑定的属性 -->
+<input type="button" value="按钮" :title="mytitle + '123'">
+```
 
-## Vue指令之`v-on`和`跑马灯效果`
+
+
+###  `v-on`
+
+v-on vue提供的事件绑定机制，缩写为"@"
+
+```
+ <!-- Vue 中提供了 v-on: 事件绑定机制 -->
+ <!-- <input type="button" value="按钮" :title="mytitle + '123'" v-on:click="show">  这里的show需要是vue对象methods里头定义的方法-->
+  <!-- <input type="button" value="按钮" :title="mytitle + '123'" @click="show">  这里的show需要是vue对象methods里头定义的方法-->
+```
 
 
 
-### 跑马灯效果
+### demo:跑马灯效果
 
 1. HTML结构：
 
@@ -171,14 +216,6 @@
     });
 
 ```
-
-
-
-
-
-
-
-## Vue指令之`v-on的缩写`和`事件修饰符`
 
 
 
