@@ -231,21 +231,11 @@ v-on vue提供的事件绑定机制，缩写为"@"
 
 + .once       事件只触发一次
 
+### `v-model`
 
+v-model可以实现数据双向绑定，但只能用在表单元素，如input(radio,text,address,email...)、select、checkbox、textarea等。至于v-bind、v-on等指令都是单向的。
 
-
-
-
-
-## Vue指令之`v-model`和`双向数据绑定`
-
-
-
-
-
-
-
-## 简易计算器案例
+### 简易计算器案例
 
 1. HTML 代码结构
 
@@ -341,17 +331,9 @@ v-on vue提供的事件绑定机制，缩写为"@"
 
 
 
+### 在Vue中使用样式
 
-
-
-
-
-
-## 在Vue中使用样式
-
-
-
-### 使用class样式
+#### 使用class样式
 
 1. 数组
 ```
@@ -375,7 +357,7 @@ v-on vue提供的事件绑定机制，缩写为"@"
 
 
 
-### 使用内联样式
+#### 使用内联样式
 
 1. 直接在元素上通过 `:style` 的形式，书写样式对象
 ```
@@ -409,7 +391,7 @@ data: {
 
 
 
-## Vue指令之`v-for`和`key`属性
+### `v-for`和`key`属性
 
 1. 迭代数组
 
@@ -449,41 +431,29 @@ data: {
 
 为了给 Vue 一个提示，**以便它能跟踪每个节点的身份，从而重用和重新排序现有元素**，你需要为每项提供一个唯一 key 属性。
 
+### `v-if`和`v-show`
 
-
-
-
-
-
-## Vue指令之`v-if`和`v-show`
-
-
-
-
-
-
-
+> v-if 的特点：每次都会重新删除或创建元素
+>
+> v-show 的特点： 每次不会重新进行DOM的删除和创建操作，只是切换了元素的 display:none 样式
+>
 > 一般来说，v-if 有更高的切换消耗而 v-show 有更高的初始渲染消耗。因此，如果需要频繁切换 v-show 较好，如果在运行时条件不大可能改变 v-if 较好。
 
 
 
+### 品牌管理案例
 
 
 
-
-## 品牌管理案例
-
-
-
-### 添加新品牌
+#### 添加新品牌
 
 
 
-### 删除品牌
+#### 删除品牌
 
 
 
-### 根据条件筛选品牌
+#### 根据条件筛选品牌
 
 1. 1.x 版本中的filterBy指令，在2.x中已经被废除：
 
@@ -565,15 +535,9 @@ search(name) {
 
 
 
-
-
-
-
-## Vue调试工具`vue-devtools`的安装步骤和使用
+## `vue-devtools`的安装步骤和使用
 
 [Vue.js devtools - 翻墙安装方式 - 推荐](https://chrome.google.com/webstore/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd?hl=zh-CN)
-
-
 
 
 
