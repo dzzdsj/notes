@@ -317,14 +317,16 @@ console.log(global.sum(12,13));
 */
 
 // let声明的变量不存在预解析
-// console.log(flag);
-// var flag = 123;
-// let flag = 456;
+console.log(flag);   //=>undefined
+var flag = 123;
+
+console.log(flag); //ReferenceError: flag is not defined
+let flag = 456;
 // ------------------------
-// let声明的变量不允许重复（在同一个作用域内）
-// let flag = 123;
-// let flag = 456;
-// console.log(flag);
+// let声明的变量不允许重复（在同一个作用域内）//SyntaxError: Identifier 'flag' has already been declared 
+let flag = 123;
+let flag = 456;
+console.log(flag);
 // --------------------------
 // ES6引入了块级作用域
 // 块内部定义的变量，在外部是不可以访问的
@@ -333,18 +335,25 @@ console.log(global.sum(12,13));
 //     let flag = 123;
 // }
 
-// {
-//     // 这里是块级作用域
-//     let flag = 111;
-//     console.log(flag);
-// }
-// console.log(flag);
+ {
+     // 这里是块级作用域
+     var flag = 234;
+     console.log(flag);
+ }
+ console.log(flag);//能获取flag
 
-// for (let i = 0; i < 3; i++) {
-//     // for循环括号中声明的变量只能在循环体中使用
-//     console.log(i);
-// }
-// console.log(i);
+ {
+     // 这里是块级作用域  
+    let flag = 111;
+     console.log(flag);
+}
+console.log(flag); //ReferenceError: flag is not defined
+
+for (let i = 0; i < 3; i++) {
+    // for循环括号中声明的变量只能在循环体中使用
+    console.log(i);
+}
+console.log(i);  //ReferenceError: i is not defined
 // ---------------------------------------
 // 在块级作用域内部，变量只能先声明再使用
 // if(true){
@@ -369,56 +378,83 @@ const abc;
 /*
     变量的解构赋值
 */
-// var a = 1;
-// var b = 2;
-// var c = 3;
+var a = 1;
+var b = 2;
+var c = 3;
+console.log(a,b,c);
+// --------------------------------
+var a = 4,b = 5,c = 6;
+console.log(a,b,c);
 
-// var a = 1,b = 2,c = 3;
+let a = 1;
+let b = 2;
+let c = 3;
+console.log(a,b,c);
+let d = 4,e = 5,f = 6;
+console.log(d,e,f);
 ```
 
 ### 数组解构赋值
 
 ```js
 // 数组的解构赋值
-// let [a,b,c] = [1,2,3];
-// let [a,b,c] = [,123,];
-// let [a=111,b,c] = [,123,];
-// console.log(a,b,c);
+let [a,b,c] = [1,2,3];
+let [d,e,f] = [,123,];
+let [i=111,j,k] = [,123,];
+console.log(a,b,c);
+console.log(d,e,f);
+console.log(i,j,k);
+
+/*output
+1 2 3
+undefined 123 undefined
+111 123 undefined
+*/
 ```
 
 ### 对象解构赋值
 
 ```js
 // 对象的解构赋值
-// let {foo,bar} = {foo : 'hello',bar : 'hi'};
-// let {foo,bar} = {bar : 'hi',foo : 'hello'};
+let {foo,bar} = {foo : 'hello',bar : 'hi'};
+console.log(foo,bar); //hello hi
+
+let {foo,bar} = {bar : 'hi',foo : 'hello'};
+console.log(foo,bar); //hello hi
 
 // 对象属性别名(如果有了别名，那么原来的名字就无效了)
-// let {foo:abc,bar} = {bar : 'hi',foo : 'nihao'};
-// console.log(foo,bar);
+let {foo:abc,bar} = {bar : 'hi',foo : 'nihao'};
+console.log(foo,bar);//ReferenceError: foo is not defined
 
 // 对象的解构赋值指定默认值
 let {foo:abc='hello',bar} = {bar : 'hi'};
-console.log(abc,bar);
+console.log(abc,bar);//hello hi
 
-// let {cos,sin,random} = Math;
-// console.log(typeof cos);
-// console.log(typeof sin);
-// console.log(typeof random);
+let {cos,sin,random} = Math;
+console.log(typeof cos);
+console.log(typeof sin);
+console.log(typeof random);
+/*output
+function
+function
+function
+*/
 ```
 
 ### 字符串解构赋值
 
 ```js
 // 字符串的解构赋值
-// let [a,b,c,d,e,length] = "hello";
-// console.log(a,b,c,d,e);
-// console.log(length);
+let [a,b,c,d,e,length] = "hello";
+console.log(a,b,c,d,e);
+console.log(length);
+console.log("hello".length);
+// h e l l o
+// undefined
+// 5
 
-// console.log("hello".length);
-
-// let {length} = "hi";
-// console.log(length);
+let {length} = "hi";
+console.log(length);//2
 ```
 
 
@@ -435,7 +471,19 @@ console.log(abc,bar);
 
     模板字符串
 */
-// console.log('hello world'.includes('world',7));
+console.log('hello world'.includes('world',7));
+console.log('hello world'.includes('world',6));
+console.log('hello world'.includes('h',1));
+console.log('hello world'.includes('h',0));
+console.log('hello world'.includes('h',9));
+console.log('hello world'.includes('h',10));
+// false
+// true
+// false
+// true
+// false
+// false
+
 
 // let url = 'admin/index.php';
 // console.log(url.startsWith('aadmin'));
