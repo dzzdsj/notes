@@ -543,7 +543,49 @@ search(name) {
 
 ## 过滤器
 
-概念：Vue.js 允许你自定义过滤器，**可被用作一些常见的文本格式化**。过滤器可以用在两个地方：**mustache 插值和 v-bind 表达式**。过滤器应该被添加在 JavaScript 表达式的尾部，由“管道”符指示；
+概念：Vue.js 允许你自定义过滤器，**可被用作一些常见的文本格式化**。过滤器可以用在两个地方：**mustache 插值表达式和 v-bind 表达式**。过滤器应该被添加在 JavaScript 表达式的尾部，由“管道”符指示；
+```js
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="./lib/vue-2.4.0.js"></script>
+</head>
+
+<body>
+  <div id="app">
+    <p>{{ msg | msgFormat('疯狂+1', '123') | test }}</p>
+  </div>
+
+  <script>
+    // 定义一个 Vue 全局的过滤器，名字叫做  msgFormat
+    Vue.filter('msgFormat', function (msg, arg, arg2) {
+      // 字符串的  replace 方法，第一个参数，除了可写一个 字符串之外，还可以定义一个正则
+      return msg.replace(/单纯/g, arg + arg2)
+    })
+
+    Vue.filter('test', function (msg) {
+      return msg + '========'
+    })
+
+
+    // 创建 Vue 实例，得到 ViewModel
+    var vm = new Vue({
+      el: '#app',
+      data: {
+        msg: '曾经，我也是一个单纯的少年，单纯的我，傻傻的问，谁是世界上最单纯的男人'
+      },
+      methods: {}
+    });
+  </script>
+</body>
+
+</html>
+```
 
 ### 私有过滤器
 
