@@ -199,4 +199,7 @@ SELECT * FROM dba_objects WHERE status !='VALID';
 
 --失效对象修复
 @?/rdbms/admin/utlrp.sql
+--推荐方式？待测试
+$ cd $ORACLE_HOME/rdbms/admin
+$ORACLE_HOME/perl/bin/perl catcon.pl --n 1 --e --b utlrp --d '''.''' utlrp.sql
 ```
