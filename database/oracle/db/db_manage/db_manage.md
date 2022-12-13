@@ -87,10 +87,13 @@ grant unlimited tablespace to ops$dzzdsj;
 
 ### 用户权限
 
-```
+```sql
 grant connect to dzzdsj;
 grant resource to dzzdsj;
 grant unlimited tablespace to dzzdsj;
+
+--
+SELECT * FROM dba_tab_privs WHERE grantee = 'PUBLIC'
 ```
 
 
@@ -189,4 +192,11 @@ BEGIN
 END;  
 /
 
+## 失效对象
+```sql
+SELECT * FROM dba_objects WHERE status !='VALID';
+--某些角色或用户的权限不正确，如public的某些权限被收回，也可能导致失效对象问题
 
+--失效对象修复
+@?/rdbms/admin/utlrp.sql
+```
