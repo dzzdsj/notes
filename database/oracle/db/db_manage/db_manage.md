@@ -45,9 +45,11 @@ alter system set ENABLE_GOLDENGATE_REPLICATION = TRUE SCOPE = BOTH;
 
 ```sql
 --
-create tablespace dzzdsj_tbs datafile '/oracle/app/oracle/oradata/DZZDSJDB/dzzdsj01.dbf' size 50m autoextend on next 50m maxsize 30G;
+create tablespace dzzdsj_tbs datafile '/oracle/app/oracle/oradata/DZZDSJDB/datafile/dzzdsj01.dbf' size 50m autoextend on next 50m maxsize 30G;
 --
-alter tablespace dzzdsj_tbs add datafile '/oracle/app/oracle/oradata/DZZDSJDB/dzzdsj02.dbf' size 50m autoextend on next 50m maxsize 30G;
+alter tablespace dzzdsj_tbs add datafile '/oracle/app/oracle/oradata/DZZDSJDB/datafile/dzzdsj02.dbf' size 50m autoextend on next 50m maxsize 30G;
+
+alter database datafile '/oracle/app/oracle/oradata/DZZDSJDB/datafile/cib01.dbf' resize 20480m;
 ```
 
 ### 临时表空间
