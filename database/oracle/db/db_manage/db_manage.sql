@@ -56,6 +56,36 @@ maximum PGA allocated                                             500019200
 
 
 
+-- hit ratio for the buffer cache （缓存命中率） 
+--缓存命中率的高低不能说明一定有问题，而应该持续跟踪，如果突然发生重大变动，那么很可能预示着数据库的重大变更。
+--oracle 一般使用完成工作的时间（cpu time）和等待工作所消耗的时间来评估性能
+--缓存命中率的计算 目前存在两套公式：
+--其一  数据中心 和 《oracle database 11g 性能调整与优化》在用
+--  Hit Ratio = 1 - (physical reads / (db block gets + consistent gets))。
+--命中率仅包括缓存读操作而不包括写操作
+select sum(decode(name,'physical reads',value,0)) phys,
+       sum(decode(name,'db block gets',value,0)) gets,
+       sum(decode(name,'consistent gets',value,0)) con_gets,
+       (1-(sum(decode(name,'physical reads',value,0))/
+       (sum(decode(name,'db block gets',value,0)) + 
+       sum(decode(name,'consistent gets',value,0))))) * 100 hitratio 
+from   v$sysstat;
+--其二 《database-performance-tuning-guide》在用，每项都分成了cache和direct，如physical reads=physical reads cache + physical reads direct等。
+--     hit ratio for the buffer cache = 1 - (('physical reads cache') / ('consistent gets from cache' + 'db block gets from cache'))
+SELECT name, value
+FROM V$SYSSTAT
+WHERE name IN ('db block gets from cache', 'consistent gets from cache','physical reads cache');
+
+select sum(decode(name,'physical reads cache',value,0)) phys,
+       sum(decode(name,'db block gets from cache',value,0)) gets,
+       sum(decode(name,'consistent gets from cache',value,0)) con_gets,
+       (1-(sum(decode(name,'physical reads cache',value,0))/
+       (sum(decode(name,'db block gets from cache',value,0)) + 
+       sum(decode(name,'consistent gets from cache',value,0))))) * 100 hitratio 
+from   v$sysstat;
+-- 变更可以参考以下视图
+SELECT * FROM V$DB_CACHE_ADVICE
 
 
+--数据块越大，能容纳的数据
 
