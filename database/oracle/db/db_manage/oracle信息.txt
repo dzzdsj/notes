@@ -1,0 +1,36 @@
+
+版本信息  Doc ID 2285040.1
+Beginning in July 2017, Oracle has transitioned to a more flexible and responsive strategy for the database software release process.  These changes only affect Database and Grid Infrastructure release 12.2 or later.  The primary goals of this strategy are twofold:
+
+长期版本和创新版本
+1. Embrace a less complex software release process
+
+a. Oracle wants to get new features to market every year instead of waiting several years
+b. Oracle desires to improve database release quality by reducing the number of software changes released at one time
+
+2. Provide customers with a more flexible way to both:
+
+a. Efficiently adopt Bug fixes when needed and decrease the need for interim one-offs (like the DB Proactive BP provides for 12.1.0.2)
+b. Efficiently keep current with Quarterly Security Updates once their environment becomes stable (like the PSU provides for 11.2.0.4 and 12.1.0.2)
+
+命名规则
+ a three (3) field format consisting of: Year.Update.Revision is used, such as 18.1.0. This allows clear indication of:
+
+the feature release designation of the database software (the first field)
+the quarterly Update (the second field)
+the quarterly Revision (the third field)
+
+第四个字段是Oracle数据库增量版本。增量版本偶尔会在Oracle云部署中使用，偶尔也会在Oracle支持的指导下使用。第五个字段保留供将来使用。对于大多数客户来说，3字段格式是他们所需要的。
+Q33: Why do I still see all 5 fields (instead of just 3 fields) in some documents and some Database outputs?
+A: The fourth field is the Oracle Database increment version. An increment version is occasionally used in Oracle Cloud deployments, and occasionally used at the direction of Oracle Support. The fifth field is reserved for future use. For most customers, the 3 field format is all they will ever need.
+
+更新和补丁
+Patching Changes - Release Updates and Release Update Revisions
+
+Q16: What is the major difference between patch content of Update and Revision?
+A:  Revisions are an extension (a revision) to a specific Update and contain additional security and regression fixes.   They can extend the Update’s lifetime up to two quarters by allowing the database to stay up-to-date on security fixes. Remember that Revisions are only provided for Long Term Releases
+
+
+
+
+
