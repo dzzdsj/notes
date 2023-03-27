@@ -56,66 +56,6 @@ maximum PGA allocated                                             500019200
 
 
 
--- hit ratio for the buffer cache （缓存命中率） 
---缓存命中率的高低不能说明一定有问题，而应该持续跟踪，如果突然发生重大变动，那么很可能预示着数据库的重大变更。
---oracle 一般使用完成工作的时间（cpu time）和等待工作所消耗的时间来评估性能
---缓存命中率的计算 目前存在两套公式：
---其一  数据中心 和 《oracle database 11g 性能调整与优化》在用
---  Hit Ratio = 1 - (physical reads / (db block gets + consistent gets))。
---命中率仅包括缓存读操作而不包括写操作
-select sum(decode(name,'physical reads',value,0)) phys,
-       sum(decode(name,'db block gets',value,0)) gets,
-       sum(decode(name,'consistent gets',value,0)) con_gets,
-       (1-(sum(decode(name,'physical reads',value,0))/
-       (sum(decode(name,'db block gets',value,0)) + 
-       sum(decode(name,'consistent gets',value,0))))) * 100 hitratio 
-from   v$sysstat;
---其二 《database-performance-tuning-guide》在用，每项都分成了cache和direct，如physical reads=physical reads cache + physical reads direct等。
---     hit ratio for the buffer cache = 1 - (('physical reads cache') / ('consistent gets from cache' + 'db block gets from cache'))
-SELECT name, value
-FROM V$SYSSTAT
-WHERE name IN ('db block gets from cache', 'consistent gets from cache','physical reads cache');
-
-select sum(decode(name,'physical reads cache',value,0)) phys,
-       sum(decode(name,'db block gets from cache',value,0)) gets,
-       sum(decode(name,'consistent gets from cache',value,0)) con_gets,
-       (1-(sum(decode(name,'physical reads cache',value,0))/
-       (sum(decode(name,'db block gets from cache',value,0)) + 
-       sum(decode(name,'consistent gets from cache',value,0))))) * 100 hitratio 
-from   v$sysstat;
--- 变更可以参考以下视图
-SELECT * FROM V$DB_CACHE_ADVICE
-
---DB_BLOCK_SIZE
---数据块大小越大，单个块能容纳的数据就越多，大量数据返回时的效率越高
---小的数据块，检索单条记录的速度更快，节省内存空间（同等内存可缓存更多的有效信息），较小的块能提高事务并发能力，减少日志文件的生成速度
---OLAP系统，如数据仓库应当使用对应平台上最大的块大小（16KB或32KB）
---OLTP系统，联机交易型系统建议使用8KB
---系统的事务处理的吞吐量特别高或内存不足时，或许可以考虑把块大小设置成小于8KB
-
-
---何时考虑增大SHARE_POOL_SIZE ？
---数据字典缓存命中率低于95%，库缓存重载率超过1%，库缓存命中率低于95%
---数据字典缓存命中率 , 除了数据块最初启动时，应当维持大于95%
-select ((1 - (sum(GetMisses) / (sum(Gets) + sum(GetMisses)))) * 100) "Hit Rate"
-from v$rowcache
-where Gets + GetMisses <> 0;
---库缓存重载率  不是0，说明有些“过时”的语句后来又需要重新载入内存
-select sum(Pins) "Hits",
-       sum(Reloads) "Misses",
-       ((sum(Reloads)/sum(Pins))*100) "Reload%"
-from v$librarycache;
---库缓存命中率
-select sum(Pins) "Hits",
-       sum(Reloads) "Misses",
-       sum(Pins)/(sum(Pins) + sum(Reloads)) "Hit Ratio"
-from v$librarycache;
-
-Log buffer
-Other buffer caches, such as KEEP, RECYCLE, and other block sizes
-Fixed SGA and other internal allocations
-
-
 --AWR
 select * from dba_hist_wr_control;
 
@@ -185,6 +125,144 @@ begin
   end;
   /
 
+
+--
+alter system flush shared_pool;
+
+ alter system flush buffer_cache;
+
+
+
+
+-- hit ratio for the buffer cache （缓存命中率） 
+--缓存命中率的高低不能说明一定有问题，而应该持续跟踪，如果突然发生重大变动，那么很可能预示着数据库的重大变更。
+--oracle 一般使用完成工作的时间（cpu time）和等待工作所消耗的时间来评估性能
+--缓存命中率的计算 目前存在两套公式：
+--其一  数据中心 和 《oracle database 11g 性能调整与优化》在用
+--  Hit Ratio = 1 - (physical reads / (db block gets + consistent gets))。
+--命中率仅包括缓存读操作而不包括写操作
+select sum(decode(name,'physical reads',value,0)) phys,
+       sum(decode(name,'db block gets',value,0)) gets,
+       sum(decode(name,'consistent gets',value,0)) con_gets,
+       (1-(sum(decode(name,'physical reads',value,0))/
+       (sum(decode(name,'db block gets',value,0)) + 
+       sum(decode(name,'consistent gets',value,0))))) * 100 hitratio 
+from   v$sysstat;
+--其二 《database-performance-tuning-guide》在用，每项都分成了cache和direct，如physical reads=physical reads cache + physical reads direct等。
+--     hit ratio for the buffer cache = 1 - (('physical reads cache') / ('consistent gets from cache' + 'db block gets from cache'))
+SELECT name, value
+FROM V$SYSSTAT
+WHERE name IN ('db block gets from cache', 'consistent gets from cache','physical reads cache');
+
+select sum(decode(name,'physical reads cache',value,0)) phys,
+       sum(decode(name,'db block gets from cache',value,0)) gets,
+       sum(decode(name,'consistent gets from cache',value,0)) con_gets,
+       (1-(sum(decode(name,'physical reads cache',value,0))/
+       (sum(decode(name,'db block gets from cache',value,0)) + 
+       sum(decode(name,'consistent gets from cache',value,0))))) * 100 hitratio 
+from   v$sysstat;
+-- 变更可以参考以下视图
+SELECT * FROM V$DB_CACHE_ADVICE
+
+--DB_BLOCK_SIZE
+--数据块大小越大，单个块能容纳的数据就越多，大量数据返回时的效率越高
+--小的数据块，检索单条记录的速度更快，节省内存空间（同等内存可缓存更多的有效信息），较小的块能提高事务并发能力，减少日志文件的生成速度
+--OLAP系统，如数据仓库应当使用对应平台上最大的块大小（16KB或32KB）
+--OLTP系统，联机交易型系统建议使用8KB
+--系统的事务处理的吞吐量特别高或内存不足时，或许可以考虑把块大小设置成小于8KB
+
+
+--何时考虑增大SHARE_POOL_SIZE ？
+--数据字典缓存命中率低于95%，库缓存重载率超过1%，库缓存命中率低于95%
+--数据字典缓存命中率 , 除了数据块最初启动时，应当维持大于95%
+select ((1 - (sum(GetMisses) / (sum(Gets) + sum(GetMisses)))) * 100) "Hit Rate"
+from v$rowcache
+where Gets + GetMisses <> 0;
+--库缓存重载率  不是0，说明有些“过时”的语句后来又需要重新载入内存
+select sum(Pins) "Hits",
+       sum(Reloads) "Misses",
+       ((sum(Reloads)/sum(Pins))*100) "Reload%"
+from v$librarycache;
+--库缓存命中率
+select sum(Pins) "Hits",
+       sum(Reloads) "Misses",
+       sum(Pins)/(sum(Pins) + sum(Reloads)) "Hit Ratio"
+from v$librarycache;
+
+Log buffer
+Other buffer caches, such as KEEP, RECYCLE, and other block sizes
+Fixed SGA and other internal allocations
+
+
+
+ --SELECT * FROM V$DB_CACHE_ADVICE;
+set linesize 200
+set pagesize 1000
+col SIZE_FOR_ESTIMATE                for 999999.99
+col SIZE_FACTOR                      for 999999.99  
+col ESTD_PHYSICAL_READ_FACTOR        for 999999.99 
+col ESTD_PHYSICAL_READ_TIME          for 999999.99
+select SIZE_FOR_ESTIMATE,SIZE_FACTOR,ESTD_PHYSICAL_READ_FACTOR,ESTD_PHYSICAL_READ_TIME from V$DB_CACHE_ADVICE; 
+
+-- SELECT * FROM V$SGA_TARGET_ADVICE;
+set linesize 500
+set pagesize 1000
+col SGA_SIZE                         for 99999999999
+col SGA_SIZE_FACTOR                  for 99.99
+col ESTD_DB_TIME                     for 99999999999
+col ESTD_DB_TIME_FACTOR              for 99.99
+col ESTD_PHYSICAL_READS              for 99999999999
+col ESTD_BUFFER_CACHE_SIZE           for 99999999999
+col ESTD_SHARED_POOL_SIZE            for 99999999999
+select SGA_SIZE,SGA_SIZE_FACTOR,ESTD_DB_TIME,ESTD_DB_TIME_FACTOR,ESTD_PHYSICAL_READS,ESTD_BUFFER_CACHE_SIZE,ESTD_SHARED_POOL_SIZE from V$SGA_TARGET_ADVICE;
+
+--EXECUTIONS,SQL_FULLTEXT (find  "table access full" sql )
+set linesize 500
+set pagesize 1000
+col EXECUTIONS                         for 99999999999
+col SQL_TEXT                           for a200
+SELECT S.EXECUTIONS,S.SQL_TEXT from V$SQL_PLAN P JOIN V$SQLAREA S ON P.SQL_ID=S.SQL_ID where P.OBJECT_OWNER='CIB' and P.object_type='TABLE' and P.OPERATION='TABLE ACCESS' and P.OPTIONS='FULL'  order by S.EXECUTIONS desc ;
+
+--determine which segments have many buffers in the pool
+--The V$BH view shows the data object ID of all blocks that currently reside in the SGA,One method to determine which segments have many buffers in the pool is to query the number of blocks for all segments that reside in the buffer cache at a given time
+COLUMN object_name FORMAT A40
+COLUMN number_of_blocks FORMAT 999,999,999,999
+SELECT o.object_name, COUNT(*) number_of_blocks
+FROM DBA_OBJECTS o, V$BH bh
+WHERE o.data_object_id = bh.OBJD
+AND o.owner != 'SYS'
+GROUP BY o.object_Name
+ORDER BY COUNT(*);
+
+SELECT o.object_name, COUNT(*) number_of_blocks
+FROM DBA_OBJECTS o, V$BH bh
+WHERE o.data_object_id = bh.OBJD
+AND (o.owner = 'DZZDSJ' OR o.owner = 'CIB' )
+GROUP BY o.object_Name
+ORDER BY COUNT(*);
+
+--To calculate the percentage of the buffer cache used by an individual object
+1. Find the Oracle Database internal object number of the segment by querying the
+DBA_OBJECTS view:
+SELECT data_object_id, object_type
+FROM DBA_OBJECTS
+WHERE object_name = UPPER('segment_name');
+Because two objects can have the same name (if they are different types of
+objects), use the OBJECT_TYPE column to identify the object of interest.
+2. Find the number of buffers in the buffer cache for SEGMENT_NAME:
+SELECT COUNT(*) buffers
+FROM V$BH
+WHERE objd = data_object_id_value;
+For data_object_id_value, use the value of DATA_OBJECT_ID from the previous
+step.
+3. Find the number of buffers in the database instance:
+SELECT name, block_size, SUM(buffers)
+FROM V$BUFFER_POOL
+GROUP BY name, block_size
+HAVING SUM(buffers) > 0;
+4. Calculate the ratio of buffers to total buffers to obtain the percentage of the cache
+currently used by SEGMENT_NAME:
+% cache used by segment_name = [buffers(Step2)/total buffers(Step3)]
 
 
 
