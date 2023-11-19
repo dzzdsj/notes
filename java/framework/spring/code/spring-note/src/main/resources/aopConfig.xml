@@ -2,22 +2,64 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-<!--增强类 bean-->
+    <!--增强类 bean-->
     <bean id="greetingBeforeAdvice" class="com.dzzdsj.note.aop.springInterface.GreetingBeforeAdvice"/>
     <bean id="greetingAfterAdvice" class="com.dzzdsj.note.aop.springInterface.GreetingAfterAdvice"/>
     <bean id="greetingAroundAdvice" class="com.dzzdsj.note.aop.springInterface.GreetingAroundAdvice"/>
     <bean id="greetingExceptionAdvice" class="com.dzzdsj.note.aop.springInterface.GreetingExceptionAdvice"/>
 
     <bean id="naiveWaiter" class="com.dzzdsj.note.aop.springInterface.NaiveWaiter"/>
-<!--    代理类 bean-->
-<!--    p:proxyInterfaces 指定代理的接口，如果是多个接口，使用list元素-->
-<!--    p:interceptorNames 指定使用的增强-->
-<!--    p:target-ref 指定对哪个bean进行代理-->
+    <!--    代理类 bean-->
+    <!--    p:proxyInterfaces 指定代理的接口，如果是多个接口，使用list元素-->
+    <!--    p:interceptorNames 指定使用的增强-->
+    <!--    p:target-ref 指定对哪个bean进行代理-->
     <bean id="waiter" class="org.springframework.aop.framework.ProxyFactoryBean"
           p:proxyInterfaces="com.dzzdsj.note.aop.springInterface.Waiter"
           p:interceptorNames="greetingBeforeAdvice,greetingAfterAdvice,greetingAroundAdvice,
                               greetingExceptionAdvice"
           p:target-ref="naiveWaiter"
     />
-<!--    注：上述用法对整个类的方法都进行了增强，但实际中往往需要更细化的进行-->
+    <!--    注：上述用法对整个类的方法都进行了增强，但实际中往往需要更细化的进行-->
+
+    <bean id="naiveWaiterTarget" class="com.dzzdsj.note.aop.springInterface.NaiveWaiter"/>
+    <bean id="anotherWaiterTarget" class="com.dzzdsj.note.aop.springInterface.NaiveWaiter"/>
+    <bean id="sellerTarget" class="com.dzzdsj.note.aop.springInterface.Seller"/>
+    <!--    e.g. 通过静态方法匹配定义切面-->
+    <bean id="greetingMatcherAdvice" class="com.dzzdsj.note.aop.springInterface.GreetingMatcherAdvice"
+          p:advice-ref="greetingBeforeAdvice"/> <!--向切面注入一个前置增强-->
+    <!--通过定义一个父bean，来配置公共的配置信息    -->
+    <bean id="parent" class="org.springframework.aop.framework.ProxyFactoryBean"
+          p:interceptorNames="greetingMatcherAdvice"
+          p:proxyTargetClass="true"/>  <!--被代理的不是接口，而是类时，设置为true-->
+    <bean id="adviceWaiter" parent="parent" p:target-ref="naiveWaiterTarget"/>
+    <bean id="adviceSeller" parent="parent" p:target-ref="sellerTarget"/>
+    <!--    e.g. 通过正则表达式定义切面-->
+    <bean id="regexpAdvice" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor"
+          p:advice-ref="greetingBeforeAdvice">
+        <property name="patterns">
+            <list>
+                <value>.*greetTo.*</value>  <!--匹配的是方法的全限定名（带类名）-->
+                <value>.*serveTo.*</value>  <!--匹配的是方法的全限定名（带类名）-->
+            </list>
+        </property>
+    </bean>
+    <bean id="regexpAdviceWaiter" class="org.springframework.aop.framework.ProxyFactoryBean"
+          p:interceptorNames="regexpAdvice"
+          p:target-ref="anotherWaiterTarget"
+          p:proxyTargetClass="true"/>
+<!--    e.g. 自动创建代理-->
+<!--    匹配bean名称-->
+<!--    <bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator"
+            p:interceptorNames="greetingBeforeAdvice"
+            p:optimize="true"> &lt;!&ndash; optimize="true",强制使用CGLib动态代理&ndash;&gt;
+        <property name="beanNames">
+            <list>
+                <value>naiveWaiterTarget</value>
+            </list>
+        </property>
+    </bean>-->
+<!--    自动代理创建-->
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
+<!--    基于注解的自动代理创建配置-->
+    <bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator"></bean>
 </beans>

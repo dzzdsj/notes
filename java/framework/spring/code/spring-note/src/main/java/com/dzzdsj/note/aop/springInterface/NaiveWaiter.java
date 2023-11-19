@@ -8,18 +8,18 @@ import org.springframework.stereotype.Component;
 public class NaiveWaiter implements Waiter{
     @Override
     public void greetTo(String name) {
-        System.out.println("greet to " + name + "...");
+        System.out.println("waiter greet to " + name + "...");
     }
 
     @Override
     public void serveTo(String name) {
-        System.out.println("serve to " + name + "...");
+        System.out.println("waiter serve to " + name + "...");
     }
 
     @Override
     public void beatTo(String name) {
-        System.out.println("beating!!!!!!!!!!!!!!!");
-        throw new RuntimeException("============beat exception==========");
+        System.out.println("waiter beating!!!!!!!!!!!!!!!");
+        throw new RuntimeException("============waiter beat exception==========");
     }
 
     public static void main(String[] args) {
