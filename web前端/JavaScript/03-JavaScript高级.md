@@ -1,31 +1,4 @@
----
-学习目标:
-  - 理解面向对象开发思想
-  - 掌握 JavaScript 面向对象开发相关模式
-  - 掌握在 JavaScript 中使用正则表达式
-  
-typora-copy-images-to media
----
-
 # JavaScript 高级
-
-<img src="./media/Unofficial_JavaScript_logo_2.svg.png" width="400" alt="">
-
-### 目标
-
-- 理解面向对象开发思想
-- 掌握 JavaScript 面向对象开发相关模式
-- 掌握在 JavaScript 中使用正则表达式
-
-### 案例演示
-
-- [贪吃蛇](snake/index.html)
-
----
-
-## 回顾
-
-> 由于 JavaScript 高级还是针对 JavaScript 语言本身的一个进阶学习，所以在开始之前我们先对以前所学过的 JavaScript 相关知识点做一个快速复习总结。
 
 ### 重新介绍 JavaScript
 
@@ -33,6 +6,7 @@ typora-copy-images-to media
 
 - 解析执行：轻量级解释型的 
 - 语言特点：动态，头等函数 (First-class Function)
+  
   + 又称函数是 JavaScript 中的一等公民
 - 执行环境：在宿主环境（host environment）下运行，浏览器是最常见的 JavaScript 宿主环境
   + 但是在很多非浏览器环境中也使用 JavaScript ，例如 node.js
