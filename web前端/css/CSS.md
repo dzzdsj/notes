@@ -1,29 +1,6 @@
-# 课程目标:
-> 1. 学会使用CSS选择器
-> 2. 熟记CSS样式和外观属性
-> 3. 熟练掌握CSS各种选择器
-> 4. 熟练掌握CSS各种选择器
-> 5. 熟练掌握CSS三种显示模式
-> 6. 熟练掌握CSS背景属性
-> 7. 熟练掌握CSS三大特性
-> 8. 熟练掌握CSS盒子模型
-> 9. 熟练掌握CSS浮动
-> 10.熟练掌握CSS定位
-> 11.熟练掌握CSS高级技巧强化CSS
-typora-copy-images-to: media
+# CSS-note:
 
-# CSS的发展历程
 
-从HTML被发明开始，样式就以各种形式存在。不同的浏览器结合它们各自的样式语言为用户提供页面效果的控制。最初的HTML只包含很少的显示属性。
-随着HTML的成长，为了满足页面设计者的要求，HTML添加了很多显示功能。但是随着这些功能的增加，HTML变的越来越杂乱，而且HTML页面也越来越臃肿。于是CSS便诞生了。
-
-# CSS 网页的美容师
-
-CSS的出现，拯救了混乱的HTML，当让更加拯救了我们web开发者。 让我们的网页更加丰富多彩。   
-
-CSS的最大贡献就是：  让 HTML 从样式中解脱苦海，  实现了 HTML 专注去做 结构呈现。 而样式交给 CSS 后，你完全可以放心的早点洗洗睡了！
-
-我想说， 没有不好看的网页，只有不会CSS的前端。
 
 # CSS初识
 
@@ -2547,7 +2524,7 @@ http://www.iconfont.cn/
        url('fonts/icomoon.ttf?7kkyc2') format('truetype'),
     url('fonts/icomoon.woff?7kkyc2') format('woff'),
        url('fonts/icomoon.svg?7kkyc2#icomoon') format('svg');
-  font-weight: normal;
+    font-weight: normal;
      font-style: normal;
    }
    ```
