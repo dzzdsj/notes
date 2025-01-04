@@ -1,0 +1,621 @@
+# 源码安装
+https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-from-source/
+
+wget https://download.redis.io/redis-stable.tar.gz
+tar -xzvf redis-stable.tar.gz
+cd redis-stable
+make
+sudo make install
+----------------------------------------------------------
+#指定配置
+redis-server /etc/redis/6379.conf
+redis-server --port 6380 --loglevel verbose
+----------------------------------------------------------
+#数据结构与使用
+#字符串
+set key value [NX|XX] [GET] [EX seconds|PX milliseconds|EXAT unix-time-seconds|PXAT unix-time-milliseconds|KEEPTTL]
+
+NX：只有当键不存在时，才设置键。
+XX：只有当键已经存在时，才设置键。
+GET：返回旧值。如果键不存在，则返回 nil。
+EX seconds：设置键的过期时间，单位为秒。
+PX milliseconds：设置键的过期时间，单位为毫秒。
+EXAT unix-time-seconds：设置键的过期时间为给定的 Unix 时间戳，单位为秒。
+PXAT unix-time-milliseconds：设置键的过期时间为给定的 Unix 时间戳，单位为毫秒。
+KEEPTTL：保留键的生存时间。
+
+复杂度O(1)
+----------
+get key
+# 设置键的值，并返回旧值
+getset key new_value
+
+mset key value [key value ...]
+mget key [key ...]
+# 只有当所有给定的键都不存在时，才设置所有键。
+msetnx key value [key value ...]
+
+# 返回键所存储的字符串值的长度。
+strlen key
+
+#获取字符串的子串
+getrange key start end
+127.0.0.1:6379> getrange mytext 0 4
+"dddd"
+127.0.0.1:6379> getrange mytext -2 -1
+"dd"
+
+#对字符串值的指定索引范围进行替换
+setrange key offset value
+
+append key value
+
+若字符串的值可以识别为数字，则redis会把它当作数字来处理。
+整数增、减
+incrby key increment
+decrby key decrement
+#加1和减1
+incr key
+decr key
+
+#其他命令
+To get help about Redis commands type:
+      "help @<group>" to get a list of commands in <group>
+      "help <command>" for help on <command>
+      "help <tab>" to get a list of possible help topics
+
+help @string
+------------
+#散列 hash
+127.0.0.1:6379> help @hash
+
+  HDEL key field [field ...]
+  summary: Deletes one or more fields and their values from a hash. Deletes the hash if no fields remain.
+  since: 2.0.0
+
+  HEXISTS key field
+  summary: Determines whether a field exists in a hash.
+  since: 2.0.0
+
+  HEXPIRE key seconds [NX|XX|GT|LT] FIELDS numfields field [field ...]
+  summary: Set expiry for hash field using relative time to expire (seconds)
+  since: 7.4.0
+
+  HEXPIREAT key unix-time-seconds [NX|XX|GT|LT] FIELDS numfields field [field ...]
+  summary: Set expiry for hash field using an absolute Unix timestamp (seconds)
+  since: 7.4.0
+
+  HEXPIRETIME key FIELDS numfields field [field ...]
+  summary: Returns the expiration time of a hash field as a Unix timestamp, in seconds.
+  since: 7.4.0
+
+  HGET key field
+  summary: Returns the value of a field in a hash.
+  since: 2.0.0
+
+  HGETALL key
+  summary: Returns all fields and values in a hash.
+  since: 2.0.0
+
+  HINCRBY key field increment
+  summary: Increments the integer value of a field in a hash by a number. Uses 0 as initial value if the field doesn't exist.
+  since: 2.0.0
+
+  HINCRBYFLOAT key field increment
+  summary: Increments the floating point value of a field by a number. Uses 0 as initial value if the field doesn't exist.
+  since: 2.6.0
+
+  HKEYS key
+  summary: Returns all fields in a hash.
+  since: 2.0.0
+
+  HLEN key
+  summary: Returns the number of fields in a hash.
+  since: 2.0.0
+
+  HMGET key field [field ...]
+  summary: Returns the values of all fields in a hash.
+  since: 2.0.0
+
+  HMSET key field value [field value ...]
+  summary: Sets the values of multiple fields.
+  since: 2.0.0
+
+  HPERSIST key FIELDS numfields field [field ...]
+  summary: Removes the expiration time for each specified field
+  since: 7.4.0
+
+  HPEXPIRE key milliseconds [NX|XX|GT|LT] FIELDS numfields field [field ...]
+  summary: Set expiry for hash field using relative time to expire (milliseconds)
+  since: 7.4.0
+
+  HPEXPIREAT key unix-time-milliseconds [NX|XX|GT|LT] FIELDS numfields field [field ...]
+  summary: Set expiry for hash field using an absolute Unix timestamp (milliseconds)
+  since: 7.4.0
+
+  HPEXPIRETIME key FIELDS numfields field [field ...]
+  summary: Returns the expiration time of a hash field as a Unix timestamp, in msec.
+  since: 7.4.0
+
+  HPTTL key FIELDS numfields field [field ...]
+  summary: Returns the TTL in milliseconds of a hash field.
+  since: 7.4.0
+
+  HRANDFIELD key [count [WITHVALUES]]
+  summary: Returns one or more random fields from a hash.
+  since: 6.2.0
+
+  HSCAN key cursor [MATCH pattern] [COUNT count] [NOVALUES]
+  summary: Iterates over fields and values of a hash.
+  since: 2.8.0
+
+  HSET key field value [field value ...]
+  summary: Creates or modifies the value of a field in a hash.
+  since: 2.0.0
+
+  HSETNX key field value
+  summary: Sets the value of a field in a hash only when the field doesn't exist.
+  since: 2.0.0
+
+  HSTRLEN key field
+  summary: Returns the length of the value of a field.
+  since: 3.2.0
+
+  HTTL key FIELDS numfields field [field ...]
+  summary: Returns the TTL in seconds of a hash field.
+  since: 7.4.0
+
+  HVALS key
+  summary: Returns all values in a hash.
+  since: 2.0.0
+
+-----------
+#列表 list 线性有序结构，可重复
+127.0.0.1:6379> help @list
+
+  BLMOVE source destination LEFT|RIGHT LEFT|RIGHT timeout
+  summary: Pops an element from a list, pushes it to another list and returns it. Blocks until an element is available otherwise. Deletes the list if the last element was moved.
+  since: 6.2.0
+
+  BLMPOP timeout numkeys key [key ...] LEFT|RIGHT [COUNT count]
+  summary: Pops the first element from one of multiple lists. Blocks until an element is available otherwise. Deletes the list if the last element was popped.
+  since: 7.0.0
+
+  BLPOP key [key ...] timeout
+  summary: Removes and returns the first element in a list. Blocks until an element is available otherwise. Deletes the list if the last element was popped.
+  since: 2.0.0
+
+  BRPOP key [key ...] timeout
+  summary: Removes and returns the last element in a list. Blocks until an element is available otherwise. Deletes the list if the last element was popped.
+  since: 2.0.0
+
+  BRPOPLPUSH source destination timeout
+  summary: Pops an element from a list, pushes it to another list and returns it. Block until an element is available otherwise. Deletes the list if the last element was popped.
+  since: 2.2.0
+
+  LINDEX key index
+  summary: Returns an element from a list by its index.
+  since: 1.0.0
+
+  LINSERT key BEFORE|AFTER pivot element
+  summary: Inserts an element before or after another element in a list.
+  since: 2.2.0
+
+  LLEN key
+  summary: Returns the length of a list.
+  since: 1.0.0
+
+  LMOVE source destination LEFT|RIGHT LEFT|RIGHT
+  summary: Returns an element after popping it from one list and pushing it to another. Deletes the list if the last element was moved.
+  since: 6.2.0
+
+  LMPOP numkeys key [key ...] LEFT|RIGHT [COUNT count]
+  summary: Returns multiple elements from a list after removing them. Deletes the list if the last element was popped.
+  since: 7.0.0
+
+  LPOP key [count]
+  summary: Returns the first elements in a list after removing it. Deletes the list if the last element was popped.
+  since: 1.0.0
+
+  LPOS key element [RANK rank] [COUNT num-matches] [MAXLEN len]
+  summary: Returns the index of matching elements in a list.
+  since: 6.0.6
+
+  LPUSH key element [element ...]
+  summary: Prepends one or more elements to a list. Creates the key if it doesn't exist.
+  since: 1.0.0
+
+  LPUSHX key element [element ...]
+  summary: Prepends one or more elements to a list only when the list exists.
+  since: 2.2.0
+
+  LRANGE key start stop
+  summary: Returns a range of elements from a list.
+  since: 1.0.0
+
+  LREM key count element
+  summary: Removes elements from a list. Deletes the list if the last element was removed.
+  since: 1.0.0
+
+  LSET key index element
+  summary: Sets the value of an element in a list by its index.
+  since: 1.0.0
+
+  LTRIM key start stop
+  summary: Removes elements from both ends a list. Deletes the list if all elements were trimmed.
+  since: 1.0.0
+
+  RPOP key [count]
+  summary: Returns and removes the last elements of a list. Deletes the list if the last element was popped.
+  since: 1.0.0
+
+  RPOPLPUSH source destination
+  summary: Returns the last element of a list after removing and pushing it to another list. Deletes the list if the last element was popped.
+  since: 1.2.0
+
+  RPUSH key element [element ...]
+  summary: Appends one or more elements to a list. Creates the key if it doesn't exist.
+  since: 1.0.0
+
+  RPUSHX key element [element ...]
+  summary: Appends an element to a list only when the list exists.
+  since: 2.2.0
+---------
+#集合 set 无序无重复
+使用场景：
+1.唯一计数器
+2.为元素打标签
+3.点赞（一人一赞）
+4.投票（两个集合，赞成、反对）
+5.两个集合，关注者、被关注者
+6.抽奖（SRANDMEMBER/SPOP）
+7.共同关注、推荐关注（集合运算）
+8.关键字筛选（set构建索引、反向索引）
+
+
+127.0.0.1:6379> help @set
+
+  SADD key member [member ...]
+  summary: Adds one or more members to a set. Creates the key if it doesn't exist.
+  since: 1.0.0
+O(N),N为给定的元素数量
+
+  SREM key member [member ...]
+  summary: Removes one or more members from a set. Deletes the set if the last member was removed.
+  since: 1.0.0
+O(N),N为给定的元素数量
+
+  SMEMBERS key
+  summary: Returns all members of a set.
+  since: 1.0.0
+O(N),N为集合中的元素数量
+
+  SCARD key
+  summary: Returns the number of members in a set.
+  since: 1.0.0
+O(1)
+
+  SISMEMBER key member
+  summary: Determines whether a member belongs to a set.
+  since: 1.0.0
+O(1)
+
+  SRANDMEMBER key [count]
+  summary: Get one or multiple random members from a set
+  since: 1.0.0
+O(N),N为返回的元素数量
+
+  SPOP key [count]
+  summary: Returns one or more random members from a set after removing them. Deletes the set if the last member was popped.
+  since: 1.0.0
+O(N),N为移除的元素数量
+
+-------#集合运算---------------
+  SINTER key [key ...]
+  summary: Returns the intersect of multiple sets.
+  since: 1.0.0
+
+  SINTERSTORE destination key [key ...]
+  summary: Stores the intersect of multiple sets in a key.
+  since: 1.0.0
+O(N*M),N为给定集合的数量，M为所有给定集合中，包含元素最少的集合的元素数量
+
+  SUNION key [key ...]
+  summary: Returns the union of multiple sets.
+  since: 1.0.0
+
+  SUNIONSTORE destination key [key ...]
+  summary: Stores the union of multiple sets in a key.
+  since: 1.0.0
+O(N),N为所有给定集合包含的元素数量总和
+
+  SDIFF key [key ...]
+  summary: Returns the difference of multiple sets.
+  since: 1.0.0
+
+  SDIFFSTORE destination key [key ...]
+  summary: Stores the difference of multiple sets in a key.
+  since: 1.0.0
+O(N),N为所有给定集合包含的元素数量总和
+------
+  SINTERCARD numkeys key [key ...] [LIMIT limit]
+  summary: Returns the number of members of the intersect of multiple sets.
+  since: 7.0.0
+
+  SMISMEMBER key member [member ...]
+  summary: Determines whether multiple members belong to a set.
+  since: 6.2.0
+
+  SMOVE source destination member
+  summary: Moves a member from one set to another.
+  since: 1.0.0
+
+  SSCAN key cursor [MATCH pattern] [COUNT count]
+  summary: Iterates over members of a set.
+  since: 2.8.0
+---------------zset有序集合---------
+#有序集合，每个元素都由一个成员和一个与成员相关联的分值组成。成员以字符串类型存储，分值以64位双精度浮点数类型存储。
+1.排行榜（zset）
+2.时间线（zset，时间戳作为分值，用zrange命令可以以分页的方式取值）
+3.自动补全，关联搜索（有序集合按权重）
+
+  zadd key [NX|XX] [GT|LT] [CH] [INCR] score member [score member ...]
+  NX: 不存在则添加，已存在则忽略。
+  XX: 已存在则更新，不存在则忽略。
+  CH：返回被修改的成员都数量。
+O(M*log(N)),M为给定成员的数量，N为集合中包含的成员数量。
+
+  zrem key member [member ...]
+O(M*log(N)),M为给定成员的数量，N为集合中包含的成员数量。
+
+  zscore key member
+O(1)
+
+  zincrby key increment member
+O(1)
+  ZCARD key
+O(1)
+
+#获取排名
+  ZRANK key member [WITHSCORE]
+O(log(N)),N为集合中包含的成员数量。
+  ZREVRANK key member [WITHSCORE]
+O(log(N)),N为集合中包含的成员数量。
+
+#获取指定索引范围内的成员
+  ZRANGE key start stop [BYSCORE|BYLEX] [REV] [LIMIT offset count] [WITHSCORES]
+  ZREVRANGE key start stop [WITHSCORES]
+  WITHSCORES:获取成员的同时获取分值
+O(log(N)+M),N为集合中包含的成员数量，M为返回的成员数量。
+
+#获取指定分值的成员
+  O(log(N)+M),N为集合中包含的成员数量，M为返回的成员数量。
+  ZRANGEBYSCORE key min max [WITHSCORES] [LIMIT offset count]
+  ZREVRANGEBYSCORE 
+使用开区间, ZRANGEBYSCORE abc (3 (6 WITHSCORES
+无穷大无穷小，+inf,-inf,用于只定义上界或下界时。
+O(log(N)+M),N为集合中包含的成员数量，M为返回的成员数量。
+
+#统计成员数量
+  ZCOUNT key min max
+O(log(N)),N为集合中包含的成员数量。
+
+#删除指定区间内的成员
+  ZREMRANGEBYRANK key start stop
+ O(log(N)+M),N为集合中包含的成员数量，M为被移除的成员数量。
+#删除指定分数区间内的成员 
+  ZREMRANGEBYSCORE key min max
+ O(log(N)+M),N为集合中包含的成员数量，M为被移除的成员数量。
+
+#集合运算
+  ZINTERSTORE destination numkeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE SUM|MIN|MA
+O(N*log(N)*M),N为给定集合中基数最小的集合的元素数量，M为给定集合的数量。
+  ZUNIONSTORE destination numkeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE SUM|MIN|MA
+O(N*log(N)),N为集合中包含的成员数量.  
+交集并集，相同元素分值会累加，不论是取交集还是并集。可以通过指定aggregate参数来指定分值计算方式。
+WEIGHTS,设置集合分值的权重
+
+#字典序
+  ZRANGEBYLEX key min max [LIMIT offset count]
+  ZREVRANGEBYLEX key max min [LIMIT offset count]
+  ZREMRANGEBYLEX key min max
+O(log(N)+M)),N为集合中包含的成员数量，M为返回的成员数量。  
+  ZLEXCOUNT key min max
+O(log(N)),N为集合中包含的成员数量。
+
+#弹出元素
+  ZPOPMAX key [count]
+  ZPOPMIN key [count]
+  BZPOPMAX key [key ...] timeout
+  BZPOPMIN key [key ...] timeout
+O(N),N为集合中包含的成员数量。
+
+-----------------------hyperloglog------------------
+专门用来计算集合基数的概率算法，无论集合多大，使用的内存固定。
+1.计数器
+2.判重
+
+  pfadd key element [element ...]
+O(N),N为给定元素的数量。
+
+#返回集合的近似基数
+  pfcount key [key ...]
+  summary: Returns the approximated cardinality of the set(s) observed by the HyperLogLog at key(s).
+O(N),N为用户给定的hyperloglog的数量。
+
+#多个hyperloglog的并集
+  PFMERGE destkey [sourcekey [sourcekey ...]]
+O(N),N为用户给定的hyperloglog的数量。
+-----------------------bitmap---------------------
+#统计被设置的二进制位数量
+  BITCOUNT key [start end [BYTE|BIT]]
+  summary: Counts the number of set bits (population counting) in a string.
+  since: 2.6.0
+
+  BITFIELD key [GET encoding offset|[OVERFLOW WRAP|SAT|FAIL] SET encoding offset value|INCRBY encoding offset increment [GET encoding offset|[OVERFLOW WRAP|SAT|FAIL] SET encoding offset value|INCRBY encoding offset increment ...]]
+  summary: Performs arbitrary bitfield integer operations on strings.
+  since: 3.2.0
+
+  BITFIELD_RO key [GET encoding offset [GET encoding offset ...]]
+  summary: Performs arbitrary read-only bitfield integer operations on strings.
+  since: 6.0.0
+
+  BITOP AND|OR|XOR|NOT destkey key [key ...]
+  summary: Performs bitwise operations on multiple strings, and stores the result.
+  since: 2.6.0
+
+  BITPOS key bit [start [end [BYTE|BIT]]]
+  summary: Finds the first set (1) or clear (0) bit in a string.
+  since: 2.8.7
+
+  GETBIT key offset
+  summary: Returns a bit value by offset.
+  since: 2.2.0
+
+  SETBIT key offset value
+  summary: Sets or clears the bit at offset of the string value. Creates the key if it doesn't exist.
+  since: 2.2.0
+-----------地理坐标------------------
+  GEOADD key [NX|XX] [CH] longitude latitude member [longitude latitude member ...]
+  summary: Adds one or more members to a geospatial index. The key is created if it doesn't exist.
+  since: 3.2.0
+
+  GEODIST key member1 member2 [M|KM|FT|MI]
+  summary: Returns the distance between two members of a geospatial index.
+  since: 3.2.0
+
+  GEOHASH key [member [member ...]]
+  summary: Returns members from a geospatial index as geohash strings.
+  since: 3.2.0
+
+  GEOPOS key [member [member ...]]
+  summary: Returns the longitude and latitude of members from a geospatial index.
+  since: 3.2.0
+
+  GEORADIUS key longitude latitude radius M|KM|FT|MI [WITHCOORD] [WITHDIST] [WITHHASH] [COUNT count [ANY]] [ASC|DESC] [STORE key|STOREDIST key]
+  summary: Queries a geospatial index for members within a distance from a coordinate, optionally stores the result.
+  since: 3.2.0
+
+  GEORADIUSBYMEMBER key member radius M|KM|FT|MI [WITHCOORD] [WITHDIST] [WITHHASH] [COUNT count [ANY]] [ASC|DESC] [STORE key|STOREDIST key]
+  summary: Queries a geospatial index for members within a distance from a member, optionally stores the result.
+  since: 3.2.0
+
+  GEORADIUSBYMEMBER_RO key member radius M|KM|FT|MI [WITHCOORD] [WITHDIST] [WITHHASH] [COUNT count [ANY]] [ASC|DESC]
+  summary: Returns members from a geospatial index that are within a distance from a member.
+  since: 3.2.10
+
+  GEORADIUS_RO key longitude latitude radius M|KM|FT|MI [WITHCOORD] [WITHDIST] [WITHHASH] [COUNT count [ANY]] [ASC|DESC]
+  summary: Returns members from a geospatial index that are within a distance from a coordinate.
+  since: 3.2.10
+
+  GEOSEARCH key FROMMEMBER member|FROMLONLAT longitude latitude BYRADIUS radius M|KM|FT|MI|BYBOX width height M|KM|FT|MI [ASC|DESC] [COUNT count [ANY]] [WITHCOORD] [WITHDIST] [WITHHASH]
+  summary: Queries a geospatial index for members inside an area of a box or a circle.
+  since: 6.2.0
+
+  GEOSEARCHSTORE destination source FROMMEMBER member|FROMLONLAT longitude latitude BYRADIUS radius M|KM|FT|MI|BYBOX width height M|KM|FT|MI [ASC|DESC] [COUNT count [ANY]] [STOREDIST]
+  summary: Queries a geospatial index for members inside an area of a box or a circle, optionally stores the result.
+  since: 6.2.0
+-----------------------流---------------------------
+包含零个或任意个流元素的有序队列，队列中的每个元素都包含一个ID和任意多个键值对，这些元素会根据ID大小在流中有序地进行排列。
+  XACK key group id [id ...]
+  summary: Returns the number of messages that were successfully acknowledged by the consumer group member of a stream.
+  since: 5.0.0
+
+  XADD key [NOMKSTREAM] [MAXLEN|MINID [=|~] threshold [LIMIT count]] *|id field value [field value ...]
+  summary: Appends a new message to a stream. Creates the key if it doesn't exist.
+  since: 5.0.0
+O(log(N)),N为流目前包含的元素数量
+
+  XAUTOCLAIM key group consumer min-idle-time start [COUNT count] [JUSTID]
+  summary: Changes, or acquires, ownership of messages in a consumer group, as if the messages were delivered to as consumer group member.
+  since: 6.2.0
+
+  XCLAIM key group consumer min-idle-time id [id ...] [IDLE ms] [TIME unix-time-milliseconds] [RETRYCOUNT count] [FORCE] [JUSTID] [LASTID lastid]
+  summary: Changes, or acquires, ownership of a message in a consumer group, as if the message was delivered a consumer group member.
+  since: 5.0.0
+
+  XDEL key id [id ...]
+  summary: Returns the number of messages after removing them from a stream.
+  since: 5.0.0
+
+  XGROUP (null)
+  summary: A container for consumer groups commands.
+  since: 5.0.0
+
+  XGROUP CREATE key group id|$ [MKSTREAM] [ENTRIESREAD entries-read]
+  summary: Creates a consumer group.
+  since: 5.0.0
+
+  XGROUP CREATECONSUMER key group consumer
+  summary: Creates a consumer in a consumer group.
+  since: 6.2.0
+
+  XGROUP DELCONSUMER key group consumer
+  summary: Deletes a consumer from a consumer group.
+  since: 5.0.0
+
+  XGROUP DESTROY key group
+  summary: Destroys a consumer group.
+  since: 5.0.0
+
+  XGROUP HELP (null)
+  summary: Returns helpful text about the different subcommands.
+  since: 5.0.0
+
+  XGROUP SETID key group id|$ [ENTRIESREAD entries-read]
+  summary: Sets the last-delivered ID of a consumer group.
+  since: 5.0.0
+
+  XINFO (null)
+  summary: A container for stream introspection commands.
+  since: 5.0.0
+
+  XINFO CONSUMERS key group
+  summary: Returns a list of the consumers in a consumer group.
+  since: 5.0.0
+
+  XINFO GROUPS key
+  summary: Returns a list of the consumer groups of a stream.
+  since: 5.0.0
+
+  XINFO HELP (null)
+  summary: Returns helpful text about the different subcommands.
+  since: 5.0.0
+
+  XINFO STREAM key [FULL [COUNT count]]
+  summary: Returns information about a stream.
+  since: 5.0.0
+
+  XLEN key
+  summary: Return the number of messages in a stream.
+  since: 5.0.0
+
+  XPENDING key group [[IDLE min-idle-time] start end count [consumer]]
+  summary: Returns the information and entries from a stream consumer group's pending entries list.
+  since: 5.0.0
+
+  XRANGE key start end [COUNT count]
+  summary: Returns the messages from a stream within a range of IDs.
+  since: 5.0.0
+
+  XREAD [COUNT count] [BLOCK milliseconds] STREAMS key [key ...] id [id ...]
+  summary: Returns messages from multiple streams with IDs greater than the ones requested. Blocks until a message is available otherwise.
+  since: 5.0.0
+
+  XREADGROUP GROUP group consumer [COUNT count] [BLOCK milliseconds] [NOACK] STREAMS key [key ...] id [id ...]
+  summary: Returns new or historical messages from a stream for a consumer in a group. Blocks until a message is available otherwise.
+  since: 5.0.0
+
+  XREVRANGE key end start [COUNT count]
+  summary: Returns the messages from a stream within a range of IDs in reverse order.
+  since: 5.0.0
+
+  XSETID key last-id [ENTRIESADDED entries-added] [MAXDELETEDID max-deleted-id]
+  summary: An internal command for replicating stream values.
+  since: 5.0.0
+
+  XTRIM key MAXLEN|MINID [=|~] threshold [LIMIT count]
+  summary: Deletes messages from the beginning of a stream.
+  since: 5.0.0
+
+

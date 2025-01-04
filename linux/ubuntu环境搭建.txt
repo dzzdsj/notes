@@ -1,2 +1,0 @@
-使用iphone热点
-sudo apt-get install ipheth-utils libimobiledevice-dev libimobiledevice-utils

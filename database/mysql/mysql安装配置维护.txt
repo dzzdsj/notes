@@ -1,0 +1,29 @@
+#安装
+##glibc二进制方式：
+
+##rpm方式：
+mkdir /mysql
+mkdir -p /opt/soft
+tar -xvf /opt/soft/mysql-8.0.40-1.el9.aarch64.rpm-bundle.tar -C /mysql
+cd /mysql 
+yum install mysql-community-*.rpm
+#时间异常则执行
+chronyc makestep
+
+#启动
+service mysqld start
+
+#默认配置
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
+
+#临时密码
+cat log-error=/var/log/mysqld.log
+A temporary password is generated for root@localhost: uQ<fIP9Ryjmh
+
+#
+mysql -uroot -p"uQ<fIP9Ryjmh"
+
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'Root_1991';
