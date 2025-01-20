@@ -1,0 +1,30 @@
+先设置环境变量，再替换源
+D:\app\anaconda3\Scripts
+--D:\app\anaconda3\Library\bin
+
+
+conda config --add channels httpsmirrors.tuna.tsinghua.edu.cnanacondapkgsfree
+conda config --add channels httpsmirrors.tuna.tsinghua.edu.cnanacondapkgsmain
+conda config --add channels httpsmirrors.tuna.tsinghua.edu.cnanacondacloudpytorch
+conda config --add channels httpsmirrors.tuna.tsinghua.edu.cnanacondacloudconda-forge
+conda config --set show_channel_urls yes
+
+conda list
+
+conda info
+
+conda info -e  #查看环境
+
+conda activate xx 切换到xx虚拟环境
+
+conda env export > environment.yaml
+conda env create -f environment.yaml
+
+
+set CONDA_FORCE_32BIT=1 # 切换到32位
+set CONDA_FORCE_32BIT=0 # 切换到64位
+
+conda create -n xxx python=2.7 创建一个python2.7 名为xxx的虚拟环境，如要创建32位的python环境，先设置为32位在创建环境，这样创建好的环境即为32位的Python环境，先切换到创建好的环境中
+然后输入python 检查下是否为32位的python2.7版本，这样即创好了
+
+conda remove -n env_name --all 移除环境，也可在Anaconda Navigator中移除

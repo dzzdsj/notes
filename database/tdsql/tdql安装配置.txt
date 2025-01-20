@@ -1,0 +1,23 @@
+10.0.0.100 dev0
+10.0.0.101 dev1
+10.0.0.102 dev2
+10.0.0.103 dev3
+
+ssh-copy-id dev0
+ssh-copy-id dev1
+ssh-copy-id dev2
+ssh-copy-id dev3
+
+systemctl stop firewalld
+systemctl disable firewalld
+systemctl status firewalld
+
+setenforce 0
+vi /etc/selinux/config
+SELINUX=disabled
+
+/etc/resolv.conf
+nameserver 8.8.8.8
+
+yum install -y rsync lsof vim sshpass
+
