@@ -2,3 +2,5 @@
 redhat订阅
 dzzdsj/Cplovezsj83648007
 
+#手动时钟同步
+chronyc makestep

@@ -51,8 +51,6 @@ Verify that shared memory (/dev/shm) is mounted properly with sufficient size:
 df -h /dev/shm
 
 依赖检查：
-
-
 yum install -y bc
 yum install -y binutils
 yum install -y compat-libcap1
@@ -107,10 +105,10 @@ id grid
 新建oracle用户、创建目录
 －g：指定用户所属的起始群组。
 －G：指定用户所属的附加群组
-/usr/sbin/useradd -u 54321 -g oinstall -G oper,dba,asmdba,backupdba,dgdba,kmdba,racdba oracle
-passwd oracle
+/usr/sbin/useradd -u 54321 -g oinstall -G oper,dba,backupdba,dgdba,kmdba,racdba oracle
+echo "Oracle_1991"|passwd --stdin oracle
 mkdir -p /oracle/app/oracle/product/19c/dbhome_1
-mkdir -p /oracle/app/oraInventory     //OUI uses to keep track of all Oracle software installed on the computer
+mkdir -p /oracle/app/oraInventory      
 chown -R oracle:oinstall /oracle/app
 
 环境变量配置
@@ -182,6 +180,7 @@ net.core.wmem_default=262144
 net.core.rmem_max=4194304
 net.core.rmem_default=262144
 fs.file-max=6815744
+fs.aio-max-nr=1048576
 kernel.sem=250 32000 100 128
 /etc/oraInst.loc
 初次安装后生成，用于指定oracle安装的用户组和配置中心目录，再次安装需要检查该文件
@@ -248,7 +247,7 @@ dzzdsj.dzzdsj.com
 yum install -y unzip
 解压文件
 su - oracle
-cd $ORACLE_HOME
+cd $ORACLE_HOME
 cp /opt/software/LINUX.X64_193000_db_home.zip .
 unzip LINUX.X64_193000_db_home.zip
 
@@ -260,6 +259,42 @@ chmod 600 /local_dir/db_install.rsp
 依赖安装
     yum install -y gcc-c++ bc binutils  compat-libcap1  compat-libstdc++-33  elfutils-libelf  elfutils-libelf-devel  fontconfig-devel  glibc  glibc-devel  ksh  libaio  libaio-devel  libX11  libXau  libXi  libXtst  libXrender  libXrender-devel  libgcc  libstdc++  libstdc++-devel  libxcb  make  smartmontools  sysstat  kmod*
 
+------------
+yum install -y bc
+yum install -y binutils
+yum install -y elfutils-libelf
+yum install -y elfutils-libelf-devel
+yum install -y fontconfig-devel
+yum install -y gcc
+yum install -y gcc-c++
+yum install -y glibc
+yum install -y glibc-devel
+yum install -y ksh
+yum install -y libaio
+yum install -y libaio-devel
+yum install -y libgcc
+yum install -y libgfortran
+yum install -y libibverbs
+yum install -y libnsl
+yum install -y libnsl2
+yum install -y librdmacm
+yum install -y libstdc++
+yum install -y libstdc++-devel
+yum install -y libxcb
+yum install -y libX11
+yum install -y libXau
+yum install -y libXi
+yum install -y libXrenders
+yum install -y libXtst
+yum install -y make
+yum install -y policycoreutils
+yum install -y policycoreutils-python-utils
+yum install -y smartmontools
+yum install -y sysstat
+-----------------
+libxcrypt-compat
+
+-------------
 cp /oracle/app/oracle/product/19c/dbhome_1/install/response/db_install.rsp /home/oracle/db_install.rsp
 vi /home/oracle/db_install.rsp
 
@@ -275,7 +310,7 @@ yum -y install xorg-x11-server-utils-7.7-20.el7.x86_64 (替换成对应的版本
 
 xdpyinfo安装
 yum install -y xdpyinfo
-）
+
 3.切换到Oracle用户： 
 #su - oracle 
 4.在Oracle用户下执行命令： 
@@ -289,7 +324,7 @@ export DISPLAY=172.20.10.2:0.0    //一般都是单个显示器，默认取0
 
 
 安装环境间检查
-/oracle/app/oracle/product/19c/dbhome_1/runInstaller -silent   -executePrereqs  -responseFile /home/oracle/db_install.rsp 
+/oracle/app/oracle/product/19c/dbhome_1/runInstaller -silent -executePrereqs -responseFile /home/oracle/db_install.rsp 
 编辑responsefile，安装数据库：
 /oracle/app/oracle/product/19c/dbhome_1/runInstaller -silent  -force -noconfig  -ignorePrereq  -responseFile /oracle/app/oracle/product/19c/dbhome_1/install/response/db_install.rsp 
 （兴业）
@@ -730,3 +765,12 @@ $ORACLE_HOME/bin/dbca -silent -createDatabase -responseFile /oracle/app/oracle/p
 用户和表空间
 create tablespace dzzdsj_tbs datafile '/oracle/app/oracle/oradata/DZZDSJDB/dzzdsj01.dbf' size 50m autoextend on next 50m maxsize 30G;
 create temporary tablespace tmp_dzzdsj_tbs datafile '/oracle/app/oracle/oradata/DZZDSJDB/tmp_dzzdsj01.dbf' size 50m autoextend on next 50m maxsize 30G;
+
+--------------oracle linux8 arm补充依赖
+tar 
+policycoreutils-python-utils
+policycoreutils-python-utils
+gcc
+libgfortran
+nfs-utils
+net-tools

@@ -1,0 +1,16 @@
+vctl system info
+
+Container runtime is stopped.
+Use 'vctl system start' to start.
+Container runtime path:       /Applications/VMware Fusion.app/Contents/Library/vkd/bin/containerd
+Log file:                     /Users/dzzdsj/.vctl/containerd.log (not exist)
+Log level:                    info
+Config:                       not set
+Virtual machine CPU (cores):  2
+Virtual machine memory (MB):  1024
+Kubernetes node CPU (cores):  2
+Kubernetes node memory (MB):  2048
+Host network:
+DMG file:                     not set
+Storage mount point:          /Users/dzzdsj/.vctl/storage
+

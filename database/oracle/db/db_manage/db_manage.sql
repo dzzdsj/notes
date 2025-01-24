@@ -264,5 +264,23 @@ HAVING SUM(buffers) > 0;
 currently used by SEGMENT_NAME:
 % cache used by segment_name = [buffers(Step2)/total buffers(Step3)]
 
-
+--查看隐藏参数的值
+select
+x.ksppinm  name,
+y.ksppstvl  value,
+y.ksppstdf  isdefault,
+decode(bitand(y.ksppstvf,7),1,'MODIFIED',4,'SYSTEM_MOD','FALSE')  ismod,
+decode(bitand(y.ksppstvf,2),2,'TRUE','FALSE')  isadj
+from
+sys.x$ksppi x,
+sys.x$ksppcv y
+where
+x.inst_id = userenv('Instance') and
+y.inst_id = userenv('Instance') and
+x.indx = y.indx 
+--具体隐藏参数
+--and x.ksppinm ='_gc_undo_affinity'
+and x.ksppinm ='control_files'
+order by
+translate(x.ksppinm, ' _', ' ');
 

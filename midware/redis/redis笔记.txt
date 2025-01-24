@@ -10,7 +10,14 @@ sudo make install
 #指定配置
 redis-server /etc/redis/6379.conf
 redis-server --port 6380 --loglevel verbose
-----------------------------------------------------------
+------------------常用命令----------------------------------------
+  KEYS pattern
+  summary: Returns all key names that match a pattern
+keys *
+
+
+
+---------------------------------
 #数据结构与使用
 #字符串
 set key value [NX|XX] [GET] [EX seconds|PX milliseconds|EXAT unix-time-seconds|PXAT unix-time-milliseconds|KEEPTTL]
