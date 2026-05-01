@@ -1,3 +1,12 @@
+### tmux
+```shell
+tmux new -s <name>
+tmux attach -t <name>
+tmux ls
+tmux kill-session -t <name>
+```
+
+
 ### dirname
 
 去除最后一个/之后的内容，如果原来不带/，输出.号
