@@ -1,0 +1,5 @@
+ctrl+command+shift+4 截屏特定区域到剪贴板
+shift+command+. 显示隐藏文件 
+复制路径： option+command+C  /option+右键->拷贝为路径名称
+最大化：Control + Command + F
+最小化窗口：command+M

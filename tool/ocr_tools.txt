@@ -1,0 +1,9 @@
+
+windows下使用tesseract识别图片文字
+教程： https://www.bilibili.com/opus/1036675560501149699?spm_id_from=333.1391.0.0
+1.下载tesseract
+链接：https://github.com/UB-Mannheim/tesseract/wiki
+语言包下载地址：https://github.com/tesseract-ocr/tessdata/releases/tag/4.00
+环境变量：TESSDATA_PREFIX
+变量值：安装路径加上\tessdata
+

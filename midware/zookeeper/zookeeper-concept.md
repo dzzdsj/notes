@@ -37,3 +37,10 @@
 
 4. 成为leader的节点等待其他flower连接。flower连接leader后，发送最大的zxid给leader。leader确认该zxid为同步点。选举完成，可以接收客户端的请求提供服务。
 
+## zookeeper的节点
+1. 节点类型：，znode⼀共有4种类型：持久的（persistent）、临时的（ephemeral）、持久有序的（persistent_sequential）和临时有序的ephemeral_sequential）
+
+数据存储为字节数组
+
+## 常用客户端API
+

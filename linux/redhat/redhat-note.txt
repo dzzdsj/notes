@@ -1,6 +1,21 @@
 
 redhat订阅
-dzzdsj/Cplovezsj83648007
+dzzdsj/Cplovezsj836xxxxx
 
-#手动时钟同步
+
+#手动时钟同步(时间设置问题会导致yum repo相关异常)
+systemctl start chronyd
+systemctl enable chronyd
 chronyc makestep
+
+#------------------------------------networkmanager
+/etc/NetworkManager/system-connections/ens160.nmconnection
+...nat模式
+[ipv4]
+address1=172.16.139.99/24,172.16.139.2
+dns=8.8.8.8
+method=manual
+...
+
+systemctl restart NetworkManager
+

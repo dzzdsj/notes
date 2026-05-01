@@ -61,6 +61,7 @@ abc
 '5'
 >>> a[-2]
 '4'
+#左闭右开
 >>> a[0:2]
 '01'
 >>> a[:2]
@@ -168,7 +169,7 @@ abcd
 ```
 
 ### 元组(Tuple)
-
+它和列表（list）类似，但最大的区别是：元组一旦创建，就不能修改其内容（不能添加、删除或修改元素）
 元组是不可变对象
 
 ```python
@@ -243,9 +244,97 @@ def test(a: int,b: int) -> int:
 print(test(1,2))
 ```
 
+### 异常
+
+try:
+except:
+finally:
+
+抛出异常
+raise  Exception
+
+### 类和对象
+class 父类:
+    def 方法(self):
+        ...
+
+class 子类(父类):
+    def 新方法(self):
+        ...
+
+支持多继承
+class C(A, B):
+    pass
+
+通常约定带单下划线的为私有属性，不带下划线的为共有属性。（仅约定，实际无任何强制约束）
+
+###模块
+模块是python源代码文件，通常以.py为后缀。
+import 模块名
+调用时使用模块名.模块对象
+
+from 模块名 import 模块对象
+调用时使用模块对象
+
+### 内置变量
+__name__ 模块名
+__file__ 模块文件名
+__package__ 模块所在包名
+__doc__ 模块文档字符串
+__all__ 模块对象
 
 
+### 包管理
+`__init__.py` 是 Python 中用于将一个普通文件夹变成 **Python 包（package）** 的特殊文件。
 
+当你在一个文件夹中创建了 `__init__.py` 文件后，Python 就会把这个文件夹当作一个“包”来处理。这样你就可以使用 `import` 来导入该包下的模块或子包。
 
+#### 主要用途：
 
+1. **标记为 Python 包**
+   - 没有这个文件，Python 不会认为该目录是包（在 Python 3.3 之前尤为重要）。
+2. **初始化代码**
+   - 当导入包时，`__init__.py` 中的代码会被自动执行。
+3. **控制导入行为**
+   - 可以在其中定义 `__all__` 来指定 `from package import *` 会导入哪些模块。
+4. **暴露包级变量或函数**
+   - 可以在里面定义变量、函数或类，供整个包使用。
+
+- 在 Python 3.3 及以后版本中，即使没有 `__init__.py`，也可以通过 `import` 导入子模块（称为 **namespace packages**），但在很多项目和工具链中仍广泛使用 `__init__.py` 来显式声明包结构。
+- 如果你想兼容旧版本 Python 或者希望明确控制包的行为，建议始终保留 `__init__.py`。
+
+#### 第三方包管理&虚拟环境
+python3 -m venv env
+python3 -m pip install somepackaage
+
+# 在项目目录中创建隔离环境
+python3 -m venv venv
+# 激活虚拟环境
+source venv/bin/activate
+# 安装你需要的包
+pip install whisper openai ffmpeg-python
+# 使用 pip freeze 查看仅当前环境下的依赖
+pip freeze
+
+#!/usr/bin/env python3
+pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
+pip install pandas -i https://mirrors.aliyun.com/pypi/simple/
+
+打包
+pip install pyinstaller -i https://mirrors.aliyun.com/pypi/simple/
+pyinstaller --onefile compare.py
+
+调试
+import pdb
+
+def compute():
+    x = 10
+    pdb.set_trace()   # 在这里设置断点
+    y = x + 5
+    print(y)
+
+compute()
+
+===============================================================================
+f-string 
 

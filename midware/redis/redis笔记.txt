@@ -15,8 +15,54 @@ redis-server --port 6380 --loglevel verbose
   summary: Returns all key names that match a pattern
 keys *
 
+#渐进式迭代 scan命令可能返回重复的键；返回键的数量是不确定的，甚至不会返回任何键，但只要命令返回的游标不为0，迭代就没结束。
+scan cursor
+scan 0 --迭代从0开始 
+scan cursor match pattern --匹配模式
+SCAN cursor [MATCH pattern] [COUNT count] [TYPE type]
+类似的还是hscan,sscan,zscan 
 
+#切换数据库
+select db 
 
+randomkey
+
+sort 
+
+exists
+
+dbsize
+
+type 
+
+rename key newkey
+
+move key db
+
+del key
+
+#异步删除
+unlink key 
+
+flushdb
+
+flushall 
+
+swapdb
+
+#过期
+expire/pexpire/expireat/pexpireat
+#获取剩余过期时间
+ttl/pttl
+
+流水线 --客户端一次发送多个请求
+事务 --服务端一次执行多个请求
+multi --开启事务
+exec --执行事务
+discard --放弃事务
+
+watch key --监控key，尝试执行事务之前入过key对应的值发生变化，则放弃事务
+unwatch key --放弃监控
 ---------------------------------
 #数据结构与使用
 #字符串

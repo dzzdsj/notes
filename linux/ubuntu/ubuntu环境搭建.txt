@@ -1,20 +1,33 @@
 #使用iphone热点
 sudo apt-get install ipheth-utils libimobiledevice-dev libimobiledevice-utils
 
+#允许远程root登录
+vi /etc/ssh/sshd_config.d/50-cloud-init.conf
+PermitRootLogin yes
+
+sudo systemctl restart ssh
+
 ##静态ip
-#/etc/netplan/
-#
-#network:
-#    version: 2
-#    ethernets:
-#        ens33:
-#            dhcp4: false
-#            addresses:
-#              - 192.168.1.100/24   # 静态 IP 和子网掩码
-#            routes:
-#              - to: default
-#                via: 192.168.1.1   # 默认路由
-#            nameservers:
-#                addresses:
-#                  - 8.8.8.8         		# DNS 服务器 1
-#                  - 114.114.114.114         # DNS 服务器 2
+/etc/netplan/50-cloud-init.yaml
+
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ens160:
+      dhcp4: no
+      addresses:
+        - 172.16.139.100/24
+      routes:
+        - to: default
+          via: 172.16.139.2
+      nameservers:
+        addresses:
+          - 8.8.8.8
+          - 114.114.114.114
+
+sudo netplan apply
+
+#开机默认启动项
+/boot/grub/grub.cfg
+set default="0" #设置默认启动项,换成启动页默认项编号
