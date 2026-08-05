@@ -23,4 +23,7 @@ yum install -y rsync lsof vim sshpass
 ---------------------------------------
 https://tdsql1031730-1300276124.cos.ap-beijing.myqcloud.com/tdsql_10.3.17.3.0.zip
 
+tccp 
+chitupass  admin/Tdsql___2024
+os  tdsql/Tdsql_____2024
 
